@@ -1,0 +1,19 @@
+data/System/TagMeDebugSearch.txt 0644
+data/System/TagMeDebugViewTags.txt 0644
+data/System/TagMePlugin.txt 0644
+data/System/TagMeSearch.txt 0644
+data/System/TagMeViewAllTags.txt 0644
+data/System/TagMeViewMyTags.txt 0644
+data/System/TagMeCreateNewTag.txt 0644
+data/System/TagMeRenameTag.txt 0644
+data/System/TagMeDeleteTag.txt 0644
+data/System/TagMeChangeRequests.txt 0644
+lib/Foswiki/Plugins/TagMePlugin.pm 0444
+pub/System/TagMePlugin/alltagcloud.gif 0644
+pub/System/TagMePlugin/tag_add.gif 0644
+pub/System/TagMePlugin/tag_addnew.gif 0644
+pub/System/TagMePlugin/tag_remove.gif 0644
+pub/System/TagMePlugin/tagme.css 0644
+pub/System/TagMePlugin/topictags.gif 0644
+templates/view.tagme.tmpl 0444
+

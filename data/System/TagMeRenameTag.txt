@@ -18,20 +18,20 @@
 %STARTSECTION{"create"}%
 <noautolink><form name="renametag" action="%SCRIPTURL{viewauth}%/%BASEWEB%/%BASETOPIC%" method="post" onsubmit="return cleanTag(this.newtag.value);">%TAGME{ tpaction="%URLPARAM{"renameaction" default="renametaginit"}%" oldtag="%URLPARAM{oldtag}%" newtag="%URLPARAM{newtag}%" note="%URLPARAM{renametagnote}%" }%
 
-<div class="twikiFormSteps">
-<div class="twikiFormStep">
+<div class="foswikiFormSteps">
+<div class="foswikiFormStep">
 Tag to rename: %BR%
 <select name="oldtag">
 <option>%URLPARAM{renametagfrom}%</option>
 %TAGME{ tpaction="showalltags" format="<option>$tag</option>" separator="$n" }%
 </select>
 </div>
-<div class="twikiFormStep">
+<div class="foswikiFormStep">
 New name for this tag: %BR%
-<input type="text" value="%URLPARAM{"renametagto" default="%URLPARAM{renametagfrom}%"}%" name="newtag" id="newtag" class="twikiInputField" size="30" onblur="this.value=cleanTag(this.value)" />
+<input type="text" value="%URLPARAM{"renametagto" default="%URLPARAM{renametagfrom}%"}%" name="newtag" id="newtag" class="foswikiInputField" size="30" onblur="this.value=cleanTag(this.value)" />
 </div>
-<div class="twikiFormStep twikiLast">
-<input type="submit" class="twikiSubmit" value="%MAKETEXT{"Rename"}%" />
+<div class="foswikiFormStep foswikiLast">
+<input type="submit" class="foswikiSubmit" value="%MAKETEXT{"Rename"}%" />
 </div>
 </div>
 <input type="hidden" name="renameaction" value="renametag" />
@@ -41,7 +41,7 @@ New name for this tag: %BR%
 %STOPINCLUDE%
 
 %BR%
-<span class="twikiGrayText">Other tag options: [[TagMeViewAllTags][View all tags]], [[TagMeViewMyTags][View my tags]], [[TagMeSearch][Search tags]]</span>
+<span class="foswikiGrayText">Other tag options: [[TagMeViewAllTags][View all tags]], [[TagMeViewMyTags][View my tags]], [[TagMeSearch][Search tags]]</span>
 
 <script type="text/javascript">
 //<![CDATA[

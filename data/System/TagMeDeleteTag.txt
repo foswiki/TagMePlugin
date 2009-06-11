@@ -17,16 +17,16 @@
 %STARTSECTION{"delete"}%
 <noautolink><form name="renametag" action="%SCRIPTURL{viewauth}%/%BASEWEB%/%BASETOPIC%" method="post" onsubmit="return confirmDelete(this.oldtag.value, this.postChangeRequest);">%TAGME{ tpaction="%URLPARAM{"deleteaction" default="deletetaginit"}%" oldtag="%URLPARAM{oldtag}%" note="%URLPARAM{renametagnote}%" }%
 
-<div class="twikiFormSteps">
-<div class="twikiFormStep">
+<div class="foswikiFormSteps">
+<div class="foswikiFormStep">
 Tag to delete: %BR%
 <select name="oldtag">
 <option>%URLPARAM{deletetag}%</option>
 %TAGME{ tpaction="showalltags" format="<option>$tag</option>" separator="$n" }%
 </select>
 </div>
-<div class="twikiFormStep twikiLast">
-<input type="submit" class="twikiSubmit" value="%MAKETEXT{"Delete"}%" />
+<div class="foswikiFormStep foswikiLast">
+<input type="submit" class="foswikiSubmit" value="%MAKETEXT{"Delete"}%" />
 </div>
 </div>
 <input type="hidden" name="deleteaction" value="deletetag" />
@@ -36,7 +36,7 @@ Tag to delete: %BR%
 %STOPINCLUDE%
 
 %BR%
-<span class="twikiGrayText">Other tag options: [[TagMeViewAllTags][View all tags]], [[TagMeViewMyTags][View my tags]], [[TagMeSearch][Search tags]]</span>
+<span class="foswikiGrayText">Other tag options: [[TagMeViewAllTags][View all tags]], [[TagMeViewMyTags][View my tags]], [[TagMeSearch][Search tags]]</span>
 
 %STARTSECTION{"dialogJavascript"}%
 <script language="javascript" type="text/javascript">

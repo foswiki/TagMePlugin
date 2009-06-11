@@ -2,9 +2,9 @@
 #
 # Copyright (C) 2006 Peter Thoeny, peter@thoeny.org
 # Copyright (c) 2006 Fred Morris, m3047-twiki@inwa.net
-# Copyright (c) 2007 Crawford Currie, http://c-dot.co.uk
 # Copyright (c) 2007 Sven Dowideit, SvenDowideit@DistributedINFORMATION.com
 # Copyright (c) 2007 Arthur Clemens, arthur@visiblearea.com
+# Copyright (c) 2007-2009 Crawford Currie, http://c-dot.co.uk
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -19,35 +19,38 @@
 #
 # =========================
 #
-# This Plugin implements tags in TWiki.
+# This Plugin implements tags in Foswiki.
 
 # =========================
-package TWiki::Plugins::TagMePlugin;
+package Foswiki::Plugins::TagMePlugin;
 
 use strict;
 
 # =========================
 use vars qw(
-  $web $topic $user $installWeb $VERSION $RELEASE $pluginName $debug
-  $initialized $workAreaDir $attachUrl $logAction $tagLinkFormat 
+  $web $topic $user $installWeb
+  $initialized $workAreaDir $attachUrl $logAction $tagLinkFormat
   $tagQueryFormat $alphaNum $doneHeader $normalizeTagInput $lineRegex
   $topicsRegex $action $style $label $header $footer $button
 );
 
-$VERSION    = '1.049';
-$RELEASE    = 'TWiki 4';
-$pluginName = 'TagMePlugin';    # Name of this Plugin
+our $VERSION           = '$Rev$';
+our $RELEASE           = '11 Jun 2009';
+our $NO_PREFS_IN_TOPIC = 1;
+our $SHORTDESCRIPTION =
+  'Tag wiki content collectively to find content by keywords';
+our $pluginName = 'TagMePlugin';    # Name of this Plugin
 
-$initialized = 0;
-$lineRegex   = "^0*([0-9]+), ([^,]+), (.*)";
+our $initialized = 0;
+our $lineRegex   = "^0*([0-9]+), ([^,]+), (.*)";
 my $tagChangeRequestTopic = 'TagMeChangeRequests';
-my $tagChangeRequestLink =
-  "[[$tagChangeRequestTopic][Tag change requests]]";
+my $tagChangeRequestLink  = "[[$tagChangeRequestTopic][Tag change requests]]";
+our $debug;
 
 BEGIN {
 
     # I18N initialization
-    if ( $TWiki::cfg{UseLocale} ) {
+    if ( $Foswiki::cfg{UseLocale} ) {
         require locale;
         import locale();
     }
@@ -57,20 +60,16 @@ BEGIN {
 sub initPlugin {
     ( $topic, $web, $user, $installWeb ) = @_;
 
-    # check for Plugins.pm versions
-    if ( $TWiki::Plugins::VERSION < 1.024 ) {
-        TWiki::Func::writeWarning(
-            "Version mismatch between $pluginName and Plugins.pm");
-        return 0;
-    }
+    $normalizeTagInput =
+      Foswiki::Func::getPreferencesFlag('TAGMEPLUGIN_NORMALIZE_TAG_INPUT') || 0;
 
-    # Get plugin debug flag
-    $debug = TWiki::Func::getPreferencesFlag('TAGMEPLUGIN_DEBUG');
-    $normalizeTagInput = TWiki::Func::getPreferencesFlag('TAGMEPLUGIN_NORMALIZE_TAG_INPUT');
-    
+    $debug = Foswiki::Func::getPreferencesFlag('TAGMEPLUGIN_DEBUG') || 0;
+
     _writeDebug("initPlugin( $web.$topic ) is OK");
     $initialized = 0;
     $doneHeader  = 0;
+
+    Foswiki::Func::registerTagHandler( 'TAGME', \&_TAGME );
 
     return 1;
 }
@@ -80,9 +79,10 @@ sub _initialize {
     return if ($initialized);
 
     # Initialization
-    $workAreaDir = TWiki::Func::getWorkArea($pluginName);
-    $attachUrl = TWiki::Func::getPubUrlPath() . "/$installWeb/$pluginName";
-    $logAction = TWiki::Func::getPreferencesFlag("\U$pluginName\E_LOGACTION");
+    $workAreaDir = Foswiki::Func::getWorkArea($pluginName);
+    $attachUrl   = Foswiki::Func::getPubUrlPath() . "/$installWeb/$pluginName";
+    $logAction = Foswiki::Func::getPreferencesFlag("\U$pluginName\E_LOGACTION")
+      || 1;
     $tagLinkFormat =
         '<a href="%SCRIPTURL{view}%/'
       . $installWeb
@@ -98,7 +98,7 @@ sub _initialize {
       . '<p class="tagmeResultsDetails">'
       . '<span class="tagmeResultsSummary">$summary</span>%BR% $n'
       . '<span class="tagmeResultsTags">Tags: $taglist</span>' . '</p>';
-    $alphaNum = TWiki::Func::getRegularExpression('mixedAlphaNum');
+    $alphaNum = Foswiki::Func::getRegularExpression('mixedAlphaNum');
 
     _addHeader();
 
@@ -109,12 +109,10 @@ sub _initialize {
 sub afterSaveHandler {
 ### my ( $text, $topic, $web, $error, $meta ) = @_;
 
-    _writeDebug("afterSaveHandler( $_[2].$_[1] )");
-
     my $newTopic = $_[1];
     my $newWeb   = $_[2];
     if ( "$newWeb.$newTopic" ne "$web.$topic"
-        && $topic ne $TWiki::cfg{HomeTopicName} )
+        && $topic ne $Foswiki::cfg{HomeTopicName} )
     {
 
         # excluding WebHome due to TWiki 4 bug on statistics viewed as WebHome
@@ -126,39 +124,31 @@ sub afterSaveHandler {
 }
 
 # =========================
-sub commonTagsHandler {
-### my ( $text, $topic, $web ) = @_;   # do not uncomment, use $_[0], $_[1]... instead
-
-    _writeDebug("commonTagsHandler( $_[2].$_[1] )");
-    $_[0] =~ s/%TAGME{(.*?)}%/_handleTagMe($1)/ge;
-}
-
-# =========================
 sub _addHeader {
     return if $doneHeader;
 
     my $header =
 "\n<style type=\"text/css\" media=\"all\">\n\@import url(\"$attachUrl/tagme.css\");\n</style>\n";
-    TWiki::Func::addToHEAD( 'TAGMEPLUGIN', $header );
+    Foswiki::Func::addToHEAD( 'TAGMEPLUGIN', $header );
     $doneHeader = 1;
 }
 
 # =========================
-sub _handleTagMe {
-    my ($attr) = @_;
-    $action = TWiki::Func::extractNameValuePair( $attr, 'tpaction' );
-    $style = TWiki::Func::extractNameValuePair( $attr, 'style' );
-    $label = TWiki::Func::extractNameValuePair( $attr, 'label' );
-    $button = TWiki::Func::extractNameValuePair( $attr, 'button' );
-    $header = TWiki::Func::extractNameValuePair( $attr, 'header' );
+sub _TAGME {
+    my ( $session, $attr, $topic, $web, $topicObject ) = @_;
+    $action = $attr->{tpaction} || '';
+    $style  = $attr->{style} || '';
+    $label  = $attr->{label} || '';
+    $button = $attr->{button} || '';
+    $header = $attr->{header} || '';
     $header =~ s/\$n/\n/go;
-    $footer = TWiki::Func::extractNameValuePair( $attr, 'footer' );
+    $footer = $attr->{footer} || '';
     $footer =~ s/\$n/\n/go;
     my $text = '';
     _initialize();
 
     if ( $action eq 'show' ) {
-	$text = _showDefault();
+        $text = _showDefault();
     }
     elsif ( $action eq 'showalltags' ) {
         $text = _showAllTags($attr);
@@ -173,8 +163,8 @@ sub _handleTagMe {
         $text = _newTagsAndAdd($attr);
     }
     elsif ( $action eq 'autonewadd' ) {
-        $text = _newTag($attr, 'silent', 1);
-        $text = _addTag($attr) unless $text =~ /twikiAlert/; 
+        $text = _newTag( $attr, 'silent', 1 );
+        $text = _addTag($attr) unless $text =~ /foswikiAlert/;
     }
     elsif ( $action eq 'add' ) {
         $text = _addTag($attr);
@@ -208,7 +198,7 @@ sub _handleTagMe {
         $text = 'Unrecognized action';
     }
     else {
-	$text = _showDefault();
+        $text = _showDefault();
     }
     return $text;
 }
@@ -217,14 +207,14 @@ sub _handleTagMe {
 sub _showDefault {
     my (@tagInfo) = @_;
 
-    return '' unless ( TWiki::Func::topicExists( $web, $topic ) );
-    
+    return '' unless ( Foswiki::Func::topicExists( $web, $topic ) );
+
     # overriden by the relevant "show" functions for each style
-    if ($style eq 'blog') {
-	return _showStyleBlog(@tagInfo);
+    if ( $style eq 'blog' ) {
+        return _showStyleBlog(@tagInfo);
     }
 
-    my $query = TWiki::Func::getCgiQuery();
+    my $query = Foswiki::Func::getCgiQuery();
     my $tagMode = $query->param('tagmode') || '';
 
     my $webTopic = "$web.$topic";
@@ -245,8 +235,7 @@ sub _showDefault {
             $num   = $1;
             $tag   = $2;
             $users = $3;
-            $line =
-              _printTagLink( $tag, '' )
+            $line  = _printTagLink( $tag, '' )
               . "<span class=\"tagMeVoteCount\">$num</span>";
             if ( $users =~ /\b$user\b/ ) {
                 $line .= _imgTag( 'tag_remove', 'Remove my vote on this tag',
@@ -283,9 +272,10 @@ sub _showDefault {
             $text .= _createJavascriptSelectBox(@notSeen);
         }
     }
-    $text .= ' '.
-      _wrapHtmlTagControl("<a href=\"%SCRIPTURL{viewauth}%/$installWeb/TagMeCreateNewTag".
-        "?from=$web.$topic\">create new tag</a>");
+    $text .= ' '
+      . _wrapHtmlTagControl(
+            "<a href=\"%SCRIPTURL{viewauth}%/$installWeb/TagMeCreateNewTag"
+          . "?from=$web.$topic\">create new tag</a>" );
 
     return _wrapHtmlTagMeShowForm($text);
 }
@@ -294,140 +284,176 @@ sub _showDefault {
 # displays a comprehensive tag management frame, with a common UI
 sub _showStyleBlog {
     my (@tagInfo) = @_;
-    my $text  = '';
+    my $text = '';
 
     # View mode
-    if (!$action) {
-	if ($button) {
-	    $text .= $button;
-	} elsif ($label) {
-	    $text = "<a href='%SCRIPTURL{viewauth}%/%WEB%/%TOPIC%?tpaction=show' title='Open tag edit menu'>" . $label . "</a>" if $label;
-	}
-	return $text;
+    if ( !$action ) {
+        if ($button) {
+            $text .= $button;
+        }
+        elsif ($label) {
+            $text =
+"<a href='%SCRIPTURL{viewauth}%/%WEB%/%TOPIC%?tpaction=show' title='Open tag edit menu'>"
+              . $label . "</a>"
+              if $label;
+        }
+        return $text;
     }
-    return _htmlErrorFeedbackChangeMessage('edit', '') unless (_canChange());
+    return _htmlErrorFeedbackChangeMessage( 'edit', '' )
+      unless ( _canChange() );
 
-    my $query = TWiki::Func::getCgiQuery();
+    my $query = Foswiki::Func::getCgiQuery();
     my $tagMode = $query->param('tagmode') || '';
 
     my $webTopic = "$web.$topic";
     @tagInfo = _readTagInfo($webTopic) unless ( scalar(@tagInfo) );
-    my @allTags = _readAllTags();
-    my $tag   = '';
-    my $num   = '';
-    my $users = '';
-    my $line  = '';
-    my %seen = ();
-    my %seen_my  = ();
-    my %seen_others  = ();
-    my %tagCount = ();
+    my @allTags     = _readAllTags();
+    my $tag         = '';
+    my $num         = '';
+    my $users       = '';
+    my $line        = '';
+    my %seen        = ();
+    my %seen_my     = ();
+    my %seen_others = ();
+    my %tagCount    = ();
+
     # header
-    $text .= $header."<fieldset class='tagmeEdit'><legend class='tagmeEdit'>Edit Tags - <a href='".
-	$topic . "' name='tagmeEdit'>Done</a></legend>";
+    $text .=
+        $header
+      . "<fieldset class='tagmeEdit'><legend class='tagmeEdit'>Edit Tags - <a href='"
+      . $topic
+      . "' name='tagmeEdit'>Done</a></legend>";
 
     # My tags on this topic + Tags from others on this topic
     foreach (@tagInfo) {
+
         # Format:  3 digit number of users, tag, comma delimited list of users
         # Example: 004, usability, UserA, UserB, UserC, UserD
         # SMELL: This format is a quick hack for easy sorting, parsing, and
         # for fast rendering
         if (/$lineRegex/) {
-            $num   = $1;
-            $tag   = $2;
-            $users = $3;
+            $num        = $1;
+            $tag        = $2;
+            $users      = $3;
             $seen{$tag} = lc $1;
-            if ( $users =~ /\b$user\b/ ) { # we tagged this topic
-	        $line = "<a class='tagmeTag' href='" . $topic .
-  	        "?tpaction=remove;tag=" . &_urlEncode($tag) . "'>". $tag .
-		"</a> ";
-		$seen_my{$tag} = _wrapHtmlTagControl($line);
-            } else {                       # others tagged it
-	        $line = "<a class='tagmeTag' href='" . $topic .
-  	        "?tpaction=add;tag=" . &_urlEncode($tag) . "'>". $tag .
-		"</a> ";
-		$line .= _imgTag( 'tag_remove', 'Force untagging',
-				  'removeall', $tag, $tagMode );
-		$seen_others{$tag} = _wrapHtmlTagControl($line);
+            if ( $users =~ /\b$user\b/ ) {    # we tagged this topic
+                $line =
+                    "<a class='tagmeTag' href='" 
+                  . $topic
+                  . "?tpaction=remove;tag="
+                  . &_urlEncode($tag) . "'>"
+                  . $tag . "</a> ";
+                $seen_my{$tag} = _wrapHtmlTagControl($line);
+            }
+            else {                            # others tagged it
+                $line =
+                    "<a class='tagmeTag' href='" 
+                  . $topic
+                  . "?tpaction=add;tag="
+                  . &_urlEncode($tag) . "'>"
+                  . $tag . "</a> ";
+                $line .= _imgTag( 'tag_remove', 'Force untagging',
+                    'removeall', $tag, $tagMode );
+                $seen_others{$tag} = _wrapHtmlTagControl($line);
             }
         }
     }
 
     if ($normalizeTagInput) {
+
         # plain sort can be used and should be just a little faster
-        $text .= "<p class='tagmeBlog'><b>My Tags on this topic: </b>" . 
-	    join( ' ', map { $seen_my{$_} } sort keys(%seen_my) ) . 
-	        "<br /><i>click to untag</i></p>";
-        $text .= "<p class='tagmeBlog'><b>Tags on this topic by others: </b>". 
-	    join( ' ', map { $seen_others{$_} } sort keys(%seen_others) ) . 
-	        "<br /><i>click tag to also tag with, click delete icon to force untag by all</i></p>" if %seen_others;
-    } else {
+        $text .=
+            "<p class='tagmeBlog'><b>My Tags on this topic: </b>"
+          . join( ' ', map { $seen_my{$_} } sort keys(%seen_my) )
+          . "<br /><i>click to untag</i></p>";
+        $text .=
+            "<p class='tagmeBlog'><b>Tags on this topic by others: </b>"
+          . join( ' ', map { $seen_others{$_} } sort keys(%seen_others) )
+          . "<br /><i>click tag to also tag with, click delete icon to force untag by all</i></p>"
+          if %seen_others;
+    }
+    else {
+
         # uppercase characters are possible, so sort with lowercase comparison
-        $text .= "<p class='tagmeBlog'><b>My Tags on this topic: </b>" . 
-            join( ' ', map { $seen_my{$_} } sort { lc $a cmp lc $b } keys(%seen_my) ) .
-	        "<br /><i>click to untag</i></p>";
-        $text .= "<p class='tagmeBlog'><b>Tags on this topic by others: </b>" . 
-            join( ' ', map { $seen_others{$_} } sort { lc $a cmp lc $b } keys(%seen_others) ) .
-	        "<br /><i>click tag to also tag with, click delete icon to force untag by all</i></p>" if %seen_others;
+        $text .= "<p class='tagmeBlog'><b>My Tags on this topic: </b>"
+          . join( ' ',
+            map { $seen_my{$_} } sort { lc $a cmp lc $b } keys(%seen_my) )
+          . "<br /><i>click to untag</i></p>";
+        $text .= "<p class='tagmeBlog'><b>Tags on this topic by others: </b>"
+          . join( ' ',
+            map    { $seen_others{$_} }
+              sort { lc $a cmp lc $b } keys(%seen_others) )
+          . "<br /><i>click tag to also tag with, click delete icon to force untag by all</i></p>"
+          if %seen_others;
     }
 
     # Related tags (and we compute counts)
-    my %related   = ();
+    my %related     = ();
     my $tagWebTopic = '';
     foreach $tagWebTopic ( _getTagInfoList() ) {
-	my @tagInfo = _readTagInfo($tagWebTopic);
-	my @seenTopic = ();
-	my $topicIsRelated = 0;
-	foreach my $line (@tagInfo) {
-	    if ( $line =~ /$lineRegex/ ) {
-		$num   = $1;
-                $tag   = $2;
-		push (@seenTopic, $tag);
-		$topicIsRelated = 1 if $seen{$tag};
-		if ($tagCount{$tag}) {
-		    $tagCount{$tag} += $num;
-		} else {
-		    $tagCount{$tag} = 1;
-		}
-	    }
-	}
-	if ($topicIsRelated) {
-	    foreach my $tag (@seenTopic) {
-		$related{$tag} = 1 unless ($seen{$tag});
-	    }
-	}
+        my @tagInfo        = _readTagInfo($tagWebTopic);
+        my @seenTopic      = ();
+        my $topicIsRelated = 0;
+        foreach my $line (@tagInfo) {
+            if ( $line =~ /$lineRegex/ ) {
+                $num = $1;
+                $tag = $2;
+                push( @seenTopic, $tag );
+                $topicIsRelated = 1 if $seen{$tag};
+                if ( $tagCount{$tag} ) {
+                    $tagCount{$tag} += $num;
+                }
+                else {
+                    $tagCount{$tag} = 1;
+                }
+            }
+        }
+        if ($topicIsRelated) {
+            foreach my $tag (@seenTopic) {
+                $related{$tag} = 1 unless ( $seen{$tag} );
+            }
+        }
     }
-    if ( %related ) {
+    if (%related) {
         $text .= "<p class='tagmeBlog'><b>Related tags:</b> ";
-	foreach my $tag (keys %related) {
-	    $text .= "<a class='tagmeTag' href='" . $topic .
-  	        "?tpaction=add;tag=" . &_urlEncode($tag) . "'>". $tag .
-		    "</a> ";
-	}
-	$text .= "<br /><i>click to tag with</i></p>"
+        foreach my $tag ( keys %related ) {
+            $text .=
+                "<a class='tagmeTag' href='" 
+              . $topic
+              . "?tpaction=add;tag="
+              . &_urlEncode($tag) . "'>"
+              . $tag . "</a> ";
+        }
+        $text .= "<br /><i>click to tag with</i></p>";
     }
 
     # Bundles, space or commas-seprated of titles: and tags
-    my $bundles = TWiki::Func::getPluginPreferencesValue('BUNDLES');
+    my $bundles = Foswiki::Func::getPluginPreferencesValue('BUNDLES');
     if ( defined($bundles) && $bundles =~ /\S/ ) {
-	my $tagsep = ( $bundles =~ /[^,]*/ ) ? qr/[\,\s]+/ :  qr/\s*\,+\s*/;
-	my $listsep = '';
-	$text .= "<p class='tagmeBlog'><b>Bundles:</b><ul><li> ";
-	foreach my $tag ( split( $tagsep, $bundles )) {
-	    if ( $tag =~ /:$/ ) {
-		$text .= $listsep . "<b>$tag</b> ";
-	    } else {
-		if ( $seen{lc $tag} ) {
-		    $text .= "<span class='tagmeTagNoclick'>" . $tag . 
-			"</span> ";
-		} else {
-		    $text .= "<a class='tagmeTag' href='" . $topic .
-			"?tpaction=autonewadd;tag=" . &_urlEncode($tag) . 
-			    "'>". $tag . "</a> ";
-		}
-	    }
-	    $listsep ="</li><li>";
-	}
-	$text .= "</li></ul></p>";
+        my $tagsep = ( $bundles =~ /[^,]*/ ) ? qr/[\,\s]+/ : qr/\s*\,+\s*/;
+        my $listsep = '';
+        $text .= "<p class='tagmeBlog'><b>Bundles:</b><ul><li> ";
+        foreach my $tag ( split( $tagsep, $bundles ) ) {
+            if ( $tag =~ /:$/ ) {
+                $text .= $listsep . "<b>$tag</b> ";
+            }
+            else {
+                if ( $seen{ lc $tag } ) {
+                    $text .=
+                      "<span class='tagmeTagNoclick'>" . $tag . "</span> ";
+                }
+                else {
+                    $text .=
+                        "<a class='tagmeTag' href='" 
+                      . $topic
+                      . "?tpaction=autonewadd;tag="
+                      . &_urlEncode($tag) . "'>"
+                      . $tag . "</a> ";
+                }
+            }
+            $listsep = "</li><li>";
+        }
+        $text .= "</li></ul></p>";
     }
 
     # Unused, available, tags in the system
@@ -436,29 +462,36 @@ sub _showStyleBlog {
         push( @notSeen, $_ ) unless ( $seen_my{$_} || $seen_others{$_} );
     }
 
-    if ( @notSeen ) {
+    if (@notSeen) {
         $text .= "<p class='tagmeBlog'><b>Available known tags:</b> ";
-	foreach my $tag (@notSeen) {
-	    $text .= "<a class='tagmeTag' href='" . $topic .
-  	        "?tpaction=add;tag=" . &_urlEncode($tag) . "'>". $tag .
-		"</a>";
-	    if ($tagCount{$tag}) {
-		$text .= "<span class=\"tagMeVoteCount\">($tagCount{$tag})</span>";
-	    } else {
-		$text .= _imgTag( 'tag_remove', 'Delete tag',
-				  'deletethetag', $tag, $tagMode );
-	    }
-	    $text .= " ";
-	}
-	$text .= "<br /><i>click to tag with, click delete icon to delete unused tags</i></p>"
+        foreach my $tag (@notSeen) {
+            $text .=
+                "<a class='tagmeTag' href='" 
+              . $topic
+              . "?tpaction=add;tag="
+              . &_urlEncode($tag) . "'>"
+              . $tag . "</a>";
+            if ( $tagCount{$tag} ) {
+                $text .=
+                  "<span class=\"tagMeVoteCount\">($tagCount{$tag})</span>";
+            }
+            else {
+                $text .=
+                  _imgTag( 'tag_remove', 'Delete tag', 'deletethetag', $tag,
+                    $tagMode );
+            }
+            $text .= " ";
+        }
+        $text .=
+"<br /><i>click to tag with, click delete icon to delete unused tags</i></p>";
     }
 
     # create and add tag
     $text .= "<p class='tagmeBlog'><b>Tag with a new tag:</b>
         <form name='createtag' style='display:inline'>
-	<input type='text' class='twikiInputField' name='tag' size='64' />
+	<input type='text' class='foswikiInputField' name='tag' size='64' />
 	<input type='hidden' name='tpaction' value='newtagsandadd' />
-	<input type='submit' class='twikiSubmit' value='Create and Tag' />
+	<input type='submit' class='foswikiSubmit' value='Create and Tag' />
 	</form>
         <br /><i>You can enter multiple tags separated by spaces</i></p>";
 
@@ -471,8 +504,9 @@ sub _showStyleBlog {
 	[[%SYSTEMWEB%.TagMeViewMyTags][view my tags]] -
 	[[%SYSTEMWEB%.TagMeSearch][search with tags]]
         </p>";
+
     # footer
-    $text .= "</fieldset>".$footer;
+    $text .= "</fieldset>" . $footer;
     return $text;
 }
 
@@ -482,7 +516,8 @@ sub _createNoJavascriptSelectBox {
     my (@notSeen) = @_;
 
     my $selectControl = '';
-    $selectControl .= '<select class="twikiSelect" name="tag"> <option></option> ';
+    $selectControl .=
+      '<select class="foswikiSelect" name="tag"> <option></option> ';
     foreach (@notSeen) {
         $selectControl .= "<option>$_</option> ";
     }
@@ -508,7 +543,7 @@ sub _createJavascriptSelectBox {
 function createSelectBox(inText, inElemId) {
 	var selectBox = document.createElement('SELECT');
 	selectBox.name = "tag";
-	selectBox.className = "twikiSelect";
+	selectBox.className = "foswikiSelect";
 	document.getElementById(inElemId).appendChild(selectBox);
 	var items = inText.split("#");
 	var i, ilen = items.length;
@@ -541,7 +576,8 @@ sub _addNewButton {
 
     my $input = '<input type="hidden" name="tpaction" value="add" />';
     $input .=
-        '<input type="image"' . ' src="'
+        '<input type="image"' 
+      . ' src="'
       . $attachUrl
       . '/tag_addnew.gif"'
       . ' class="tag_addnew"'
@@ -555,27 +591,26 @@ sub _addNewButton {
 # =========================
 sub _showAllTags {
     my ($attr) = @_;
-    
+
     my @allTags = _readAllTags();
     return '' if scalar @allTags == 0;
-    
-    my $qWeb      = TWiki::Func::extractNameValuePair( $attr, 'web' );
-    my $qTopic    = TWiki::Func::extractNameValuePair( $attr, 'topic' );
-    my $exclude   = TWiki::Func::extractNameValuePair( $attr, 'exclude' );
-    my $by        = TWiki::Func::extractNameValuePair( $attr, 'by' );
-    my $format    = TWiki::Func::extractNameValuePair( $attr, 'format' );
-    my $header    = TWiki::Func::extractNameValuePair( $attr, 'header' );
-    my $separator = TWiki::Func::extractNameValuePair( $attr, 'separator' );
-    my $footer    = TWiki::Func::extractNameValuePair( $attr, 'footer' );
-    my $minSize   = TWiki::Func::extractNameValuePair( $attr, 'minsize' );
-    my $maxSize   = TWiki::Func::extractNameValuePair( $attr, 'maxsize' );
-    my $minCount  = TWiki::Func::extractNameValuePair( $attr, 'mincount' );
+
+    my $qWeb      = $attr->{web} || '';
+    my $qTopic    = $attr->{topic} || '';
+    my $exclude   = $attr->{exclude} || '';
+    my $by        = $attr->{by} || '';
+    my $format    = $attr->{format} || '';
+    my $header    = $attr->{header} || '';
+    my $separator = $attr->{separator} || '';
+    my $footer    = $attr->{footer} || '';
+    my $minSize   = $attr->{minsize} || '';
+    my $maxSize   = $attr->{maxsize} || '';
+    my $minCount  = $attr->{mincount} || '';
 
     $minCount = 1 if !defined($minCount) || $qWeb || $qTopic || $exclude || $by;
 
     # a comma separated list of 'selected' options (for html forms)
-    my $selection = TWiki::Func::extractNameValuePair( $attr, 'selection' )
-      || '';
+    my $selection = $attr->{selection} || '';
     my %selected = map { $_ => 1 } split( /,\s*/, $selection );
 
     $topicsRegex = '';
@@ -608,7 +643,12 @@ sub _showAllTags {
     $minSize = 90  unless ($minSize);
     my $text = '';
     my $line = '';
-    unless ( $format =~ /\$(size|count|order)/ || $by || $qWeb || $qTopic || $exclude ) {
+    unless ( $format =~ /\$(size|count|order)/
+        || $by
+        || $qWeb
+        || $qTopic
+        || $exclude )
+    {
 
         # fast processing
         $text = join(
@@ -629,12 +669,12 @@ sub _showAllTags {
         # slow processing
         # SMELL: Quick hack, should be done with nice data structure
         my %tagCount = ();
-        my %allTags  = map {$_=>1} @allTags;
+        my %allTags  = map { $_ => 1 } @allTags;
         my %myTags   = ();
         my $webTopic = '';
 
-        foreach (keys %allTags) {
-          $tagCount{$_} = 0;
+        foreach ( keys %allTags ) {
+            $tagCount{$_} = 0;
         }
 
         foreach $webTopic ( _getTagInfoList() ) {
@@ -657,7 +697,7 @@ sub _showAllTags {
                 }
             }
         }
-        
+
         if ($minCount) {
 
             # remove items below the threshold
@@ -685,23 +725,22 @@ sub _showAllTags {
         }
         if ( $by && !scalar @tags ) {
             return
-              "__Note:__ You haven't yet added any tags. To add a tag, go to "
+                "__Note:__ You haven't yet added any tags. To add a tag, go to "
               . "a topic of interest, and add a tag from the list, or put your "
               . "vote on an existing tag.";
         }
 
-#        my @ordered = sort { $tagCount{$a} <=> $tagCount{$b} } @tags;
+        #        my @ordered = sort { $tagCount{$a} <=> $tagCount{$b} } @tags;
         my @ordered = sort { $tagCount{$a} <=> $tagCount{$b} } keys(%tagCount);
-        my %order = map { ( $_, $tagCount{$_} ) }
-          @ordered;
+        my %order        = map { ( $_, $tagCount{$_} ) } @ordered;
         my $smallestItem = $ordered[0];
-        my $largestItem = $ordered[$#ordered];
-        my $smallest = $order{$smallestItem};
-        my $largest = $order{$largestItem};
-        my $div = ($largest - $smallest) || 1; # prevent division by zero
-        my $sizingFactor = ($maxSize - $minSize) / $div;
-        my $size   = 0;
-        my $tmpSep = '_#_';
+        my $largestItem  = $ordered[$#ordered];
+        my $smallest     = $order{$smallestItem};
+        my $largest      = $order{$largestItem};
+        my $div = ( $largest - $smallest ) || 1;    # prevent division by zero
+        my $sizingFactor = ( $maxSize - $minSize ) / $div;
+        my $size         = 0;
+        my $tmpSep       = '_#_';
         $text = join(
             $separator,
             map {
@@ -718,32 +757,35 @@ sub _showAllTags {
               } @tags
         );
     }
-    return $text ? $header.$text.$footer : $text;
+    return $text ? $header . $text . $footer : $text;
 }
 
 # =========================
 sub _queryTag {
     my ($attr) = @_;
 
-    my $qWeb   = TWiki::Func::extractNameValuePair( $attr, 'web' );
-    my $qTopic = TWiki::Func::extractNameValuePair( $attr, 'topic' );
-    my $qTag = _urlDecode( TWiki::Func::extractNameValuePair( $attr, 'tag' ) );
-    my $refine = TWiki::Func::extractNameValuePair( $attr, 'refine' )
-      || TWiki::Func::getPluginPreferencesFlag('ALWAYS_REFINE');
-    my $qBy       = TWiki::Func::extractNameValuePair( $attr, 'by' );
-    my $noRelated = TWiki::Func::extractNameValuePair( $attr, 'norelated' );
-    my $noTotal   = TWiki::Func::extractNameValuePair( $attr, 'nototal' );
-    my $sort = TWiki::Func::extractNameValuePair( $attr, 'sort' ) || 'tagcount';
-    my $format = TWiki::Func::extractNameValuePair( $attr, 'format' )
+    my $qWeb   = $attr->{web} || '';
+    my $qTopic = $attr->{topic} || '';
+    my $qTag = _urlDecode( $attr->{tag} || '');
+    my $refine =
+         $attr->{refine}
+      || Foswiki::Func::getPluginPreferencesFlag('ALWAYS_REFINE')
+      || 1;
+    my $qBy       = $attr->{by} || '';
+    my $noRelated = $attr->{norelated} || '';
+    my $noTotal   = $attr->{nototal} || '';
+    my $sort      = $attr->{sort}
+      || 'tagcount';
+    my $format = $attr->{format}
       || $tagQueryFormat;
-    my $separator = TWiki::Func::extractNameValuePair( $attr, 'separator' )
+    my $separator = $attr->{separator}
       || "\n";
-    my $minSize      = TWiki::Func::extractNameValuePair( $attr, 'minsize' );
-    my $maxSize      = TWiki::Func::extractNameValuePair( $attr, 'maxsize' );
-    my $resultLimit  = TWiki::Func::extractNameValuePair( $attr, 'limit' );
-    my $formatHeader = TWiki::Func::extractNameValuePair( $attr, 'header' )
+    my $minSize      = $attr->{minsize} || '';
+    my $maxSize      = $attr->{maxsize} || '';
+    my $resultLimit  = $attr->{limit} || '';
+    my $formatHeader = $attr->{header}
       || '---+++ $web';
-    my $formatFooter = TWiki::Func::extractNameValuePair( $attr, 'footer' )
+    my $formatFooter = $attr->{footer}
       || 'Showing $limit out of $count results $showmore';
 
     return '__Note:__ Please select a tag' unless ($qTag);
@@ -807,7 +849,7 @@ sub _queryTag {
         elsif ( $tagVotes{$webTopic} ) {
             $topicTags{$webTopic} = [ sort { lc $a cmp lc $b } @tags ];
             foreach $tag (@tags) {
-                unless( $tag =~ /^($qTagsRE)$/ ) {
+                unless ( $tag =~ /^($qTagsRE)$/ ) {
                     $num = $related{$tag} || 0;
                     $related{$tag} = $num + 1;
                 }
@@ -886,7 +928,7 @@ sub _queryTag {
             my %resultCount;
             foreach $webTopic (@topics) {
                 my ( $thisWeb, $thisTopic ) =
-                  TWiki::Func::normalizeWebTopicName( '', $webTopic );
+                  Foswiki::Func::normalizeWebTopicName( '', $webTopic );
 
                 #initialise this new web with the header
                 unless ( defined( $webText{$thisWeb} ) ) {
@@ -962,11 +1004,12 @@ sub _printWebTopic {
     my $qT1  = $2
       ; # Workaround for core bug Bugs:Item2625, fixed in SVN 11484, hotfix-4.0.4-4
     my $qTopic = quotemeta("$2$3");
-    my $text   = '%SEARCH{ '
+    my $text =
+        '%SEARCH{ '
       . "\"^$qTopic\$\" scope=\"topic\" web=\"$qWeb\" topic=\"$qT1\*\" "
       . 'regex="on" limit="1" nosearch="on" nototal="on" '
       . "format=\"$format\"" . ' }%';
-    $text = TWiki::Func::expandCommonVariables( $text, $qTopic, $qWeb );
+    $text = Foswiki::Func::expandCommonVariables( $text, $qTopic, $qWeb );
 
     # TODO: should be conditional sort
     $text =~
@@ -987,8 +1030,8 @@ sub _printTagLink {
         my $text = $tagLinkFormat;
         if ($refine) {
             $text = '[['
-              . TWiki::Func::getCgiQuery()->url( -path_info => 1 ) . '?'
-              . TWiki::Func::getCgiQuery()->query_string();
+              . Foswiki::Func::getCgiQuery()->url( -path_info => 1 ) . '?'
+              . Foswiki::Func::getCgiQuery()->query_string();
             $text .= ";tag=" . _urlEncode($tag) . '][' . $tag . ']]';
         }
 
@@ -1010,9 +1053,9 @@ sub _printTagLink {
 sub _newTag {
     my ($attr) = @_;
 
-    my $tag = TWiki::Func::extractNameValuePair( $attr, 'tag' );
-    my $note = TWiki::Func::extractNameValuePair( $attr, 'note' ) || '';
-    my $silent = TWiki::Func::extractNameValuePair( $attr, 'silent' );
+    my $tag    = $attr->{tag} || '';
+    my $note   = $attr->{note} || '';
+    my $silent = $attr->{silent} || '';
 
     return _wrapHtmlErrorFeedbackMessage( "<nop>$user cannot add new tags",
         $note )
@@ -1024,13 +1067,15 @@ sub _newTag {
       unless ($tag);
     my @allTags = _readAllTags();
     if ( grep( /^\Q$tag\E$/, @allTags ) ) {
-	return _wrapHtmlErrorFeedbackMessage("Tag \"$tag\" already exists", $note ) unless (defined $silent) ;
+        return _wrapHtmlErrorFeedbackMessage( "Tag \"$tag\" already exists",
+            $note )
+          unless ( defined $silent );
     }
     else {
         push( @allTags, $tag );
         writeAllTags(@allTags);
         _writeLog("New tag '$tag'");
-        my $query = TWiki::Func::getCgiQuery();
+        my $query = Foswiki::Func::getCgiQuery();
         my $from  = $query->param('from');
         if ($from) {
             $note =
@@ -1066,10 +1111,10 @@ sub _makeSafeTag {
 # Add tag to topic
 # The tag must already exist
 sub _addTag {
-    my ( $attr ) = @_;
+    my ($attr) = @_;
 
-    my $addTag = TWiki::Func::extractNameValuePair( $attr, 'tag' );
-    my $noStatus = TWiki::Func::extractNameValuePair( $attr, 'nostatus' );
+    my $addTag   = $attr->{tag} || '';
+    my $noStatus = $attr->{nostatus} || '';
 
     my $webTopic = "$web.$topic";
     my @tagInfo  = _readTagInfo($webTopic);
@@ -1078,7 +1123,7 @@ sub _addTag {
     my $num      = '';
     my $users    = '';
     my @result   = ();
-    if ( TWiki::Func::topicExists( $web, $topic ) ) {
+    if ( Foswiki::Func::topicExists( $web, $topic ) ) {
         foreach my $line (@tagInfo) {
             if ( $line =~ /$lineRegex/ ) {
                 $num   = $1;
@@ -1086,8 +1131,7 @@ sub _addTag {
                 $users = $3;
                 if ( $tag eq $addTag ) {
                     if ( $users =~ /\b$user\b/ ) {
-                        $text .=
-                          _wrapHtmlFeedbackErrorInline(
+                        $text .= _wrapHtmlFeedbackErrorInline(
                             "you already added this tag");
                     }
                     else {
@@ -1129,20 +1173,20 @@ sub _addTag {
 # =========================
 # Create and tag with multiple tags
 sub _newTagsAndAdd {
-    my ( $attr ) = @_;
+    my ($attr) = @_;
     my $text;
     my $args;
-    my $tags = TWiki::Func::extractNameValuePair( $attr, 'tag' );
+    my $tags = $attr->{tag} || '';
     $tags =~ s/^\s+//o;
     $tags =~ s/\s+$//o;
     $tags =~ s/\s\s+/ /go;
-    foreach my $tag ( split( ' ', $tags )) {
-	$tag = _makeSafeTag($tag);
-	if ($tag) {
-	    $args = 'tag="' . $tag . '"';
-	    $text = _newTag($args);
-	    $text = _addTag($args) unless $text =~ /twikiAlert/;
-	}
+    foreach my $tag ( split( ' ', $tags ) ) {
+        $tag = _makeSafeTag($tag);
+        if ($tag) {
+            $args = 'tag="' . $tag . '"';
+            $text = _newTag($args);
+            $text = _addTag($args) unless $text =~ /foswikiAlert/;
+        }
     }
     return $text;
 }
@@ -1150,10 +1194,10 @@ sub _newTagsAndAdd {
 # =========================
 # Remove my tag vote from topic
 sub _removeTag {
-    my ( $attr ) = @_;
+    my ($attr) = @_;
 
-    my $removeTag = TWiki::Func::extractNameValuePair( $attr, 'tag' );
-    my $noStatus = TWiki::Func::extractNameValuePair( $attr, 'nostatus' );
+    my $removeTag = $attr->{tag} || '';
+    my $noStatus  = $attr->{nostatus} || '';
 
     my $webTopic = "$web.$topic";
     my @tagInfo  = _readTagInfo($webTopic);
@@ -1175,8 +1219,7 @@ sub _removeTag {
                     $num--;
                     if ($num) {
                         $line = _tagDataLine( $num, $tag, $users );
-                        $text .=
-                          _wrapHtmlFeedbackInline(
+                        $text .= _wrapHtmlFeedbackInline(
                             "removed my tag vote on \"$tag\"");
                         _writeLog("Removed tag vote on '$tag'");
                         push( @result, $line );
@@ -1211,10 +1254,10 @@ sub _removeTag {
 # =========================
 # Force remove tag  from topic (clear all users votes)
 sub _removeAllTag {
-    my ( $attr ) = @_;
+    my ($attr) = @_;
 
-    my $removeTag = TWiki::Func::extractNameValuePair( $attr, 'tag' );
-    my $noStatus = TWiki::Func::extractNameValuePair( $attr, 'nostatus' );
+    my $removeTag = $attr->{tag} || '';
+    my $noStatus  = $attr->{nostatus} || '';
 
     my $webTopic = "$web.$topic";
     my @tagInfo  = _readTagInfo($webTopic);
@@ -1231,20 +1274,23 @@ sub _removeAllTag {
             $tag   = $2;
             $users = $3;
             if ( $tag eq $removeTag ) {
-		$text .= _wrapHtmlFeedbackInline("removed tag \"$tag\"");
-		_writeLog("Removed tag '$tag'");
-		$found = 1;
-            } else {
+                $text .= _wrapHtmlFeedbackInline("removed tag \"$tag\"");
+                _writeLog("Removed tag '$tag'");
+                $found = 1;
+            }
+            else {
                 push( @result, $line );
             }
-        } else {
+        }
+        else {
             push( @result, $line );
         }
     }
     if ($found) {
         @tagInfo = reverse sort(@result);
         _writeTagInfo( $webTopic, @tagInfo );
-    } else {
+    }
+    else {
         $text .= _wrapHtmlFeedbackErrorInline("Tag \"$removeTag\" not found");
     }
 
@@ -1303,7 +1349,7 @@ sub _readTagInfo {
     my ($webTopic) = @_;
 
     $webTopic =~ s/[\/\\]/\./g;
-    my $text = TWiki::Func::readFile("$workAreaDir/_tags_$webTopic.txt");
+    my $text = Foswiki::Func::readFile("$workAreaDir/_tags_$webTopic.txt");
     my @info = grep { /^[0-9]/ } split( /\n/, $text );
     return @info;
 }
@@ -1314,10 +1360,9 @@ sub _writeTagInfo {
     $webTopic =~ s/[\/\\]/\./g;
     my $file = "$workAreaDir/_tags_$webTopic.txt";
     if ( scalar @info ) {
-        my $text =
-          "# This file is generated, do not edit\n"
+        my $text = "# This file is generated, do not edit\n"
           . join( "\n", reverse sort @info ) . "\n";
-        TWiki::Func::saveFile( $file, $text );
+        Foswiki::Func::saveFile( $file, $text );
     }
     elsif ( -e $file ) {
         unlink($file);
@@ -1333,15 +1378,15 @@ sub renameTagInfo {
     my $oldFile = "$workAreaDir/_tags_$oldWebTopic.txt";
     my $newFile = "$workAreaDir/_tags_$newWebTopic.txt";
     if ( -e $oldFile ) {
-        my $text = TWiki::Func::readFile($oldFile);
-        TWiki::Func::saveFile( $newFile, $text );
+        my $text = Foswiki::Func::readFile($oldFile);
+        Foswiki::Func::saveFile( $newFile, $text );
         unlink($oldFile);
     }
 }
 
 # =========================
 sub _readAllTags {
-    my $text = TWiki::Func::readFile("$workAreaDir/_tags_all.txt");
+    my $text = Foswiki::Func::readFile("$workAreaDir/_tags_all.txt");
 
     #my @tags = grep{ /^[${alphaNum}_]/ } split( /\n/, $text );
     # we assume that this file has been written by TagMe, so tags should be
@@ -1355,10 +1400,9 @@ sub _readAllTags {
 # the _tags_all file.
 sub writeAllTags {
     my (@tags) = @_;
-    my $text =
-      "# This file is generated, do not edit\n"
+    my $text = "# This file is generated, do not edit\n"
       . join( "\n", sort { lc $a cmp lc $b } @tags ) . "\n";
-    TWiki::Func::saveFile( "$workAreaDir/_tags_all.txt", $text );
+    Foswiki::Func::saveFile( "$workAreaDir/_tags_all.txt", $text );
 }
 
 # =========================
@@ -1439,8 +1483,8 @@ sub _modifyTag {
 sub _canChange {
 
     my $allowModifyPrefNames =
-         TWiki::Func::getPluginPreferencesValue('ALLOW_TAG_CHANGE')
-      || TWiki::Func::getPluginPreferencesValue('ALLOW_TAG_CHANGE');
+      Foswiki::Func::getPluginPreferencesValue('ALLOW_TAG_CHANGE')
+      || 'AdminGroup';
 
     return 1 if !$allowModifyPrefNames;    # anyone is allowed to change
 
@@ -1449,8 +1493,9 @@ sub _canChange {
     foreach (@groupsAndUsers) {
         my $name = $_;
         $name =~ s/(Main\.|\%MAINWEB\%\.)//go;
-        return 1 if ( $name eq TWiki::Func::getWikiName(undef) ); # user is listed
-        return 1 if _isGroupMember( $name );
+        return 1
+          if ( $name eq Foswiki::Func::getWikiName(undef) );    # user is listed
+        return 1 if Foswiki::Func::isGroupMember($name);
     }
 
     # this user is not in list
@@ -1461,11 +1506,11 @@ sub _canChange {
 sub _renameTag {
     my ($attr) = @_;
 
-    my $oldTag = TWiki::Func::extractNameValuePair( $attr, 'oldtag' );
-    my $newTag = TWiki::Func::extractNameValuePair( $attr, 'newtag' );
-    my $note   = TWiki::Func::extractNameValuePair( $attr, 'note' ) || '';
+    my $oldTag = $attr->{oldtag} || '';
+    my $newTag = $attr->{newtag} || '';
+    my $note   = $attr->{note} || '';
 
-    my $query = TWiki::Func::getCgiQuery();
+    my $query = Foswiki::Func::getCgiQuery();
     my $postChangeRequest = $query->param('postChangeRequest') || '';
     if ($postChangeRequest) {
         return _handlePostChangeRequest( 'rename', $oldTag, $newTag, $note );
@@ -1490,7 +1535,7 @@ sub _renameTag {
 sub _handlePostChangeRequest {
     my ( $mode, $oldTag, $newTag, $note ) = @_;
 
-    my $userName    = TWiki::Func::getWikiUserName();
+    my $userName    = Foswiki::Func::getWikiUserName();
     my $requestLine = '';
     my $message     = '';
     my $logMessage  = '';
@@ -1511,9 +1556,9 @@ sub _handlePostChangeRequest {
     }
 
     my ( $meta, $text ) =
-      TWiki::Func::readTopic( $installWeb, $tagChangeRequestTopic );
+      Foswiki::Func::readTopic( $installWeb, $tagChangeRequestTopic );
     $text .= $requestLine;
-    TWiki::Func::saveTopic( $installWeb, $tagChangeRequestTopic, $meta, $text,
+    Foswiki::Func::saveTopic( $installWeb, $tagChangeRequestTopic, $meta, $text,
         { comment => 'posted tag change request' } );
 
     $message .= "%BR%$note" if $note;
@@ -1531,7 +1576,7 @@ sub _handlePostChangeRequest {
 sub _modifyTagInit {
     my ( $mode, $attr ) = @_;
 
-    my $note = TWiki::Func::extractNameValuePair( $attr, 'note' ) || '';
+    my $note = $attr->{note} || '';
 
     return _htmlErrorFeedbackChangeMessage( $mode, $note ) if !_canChange();
 
@@ -1541,10 +1586,10 @@ sub _modifyTagInit {
 # =========================
 sub _deleteTag {
     my ($attr) = @_;
-    my $deleteTag = TWiki::Func::extractNameValuePair( $attr, 'oldtag' );
-    my $note = TWiki::Func::extractNameValuePair( $attr, 'note' ) || '';
+    my $deleteTag = $attr->{oldtag} || '';
+    my $note = $attr->{note} || '';
 
-    my $query = TWiki::Func::getCgiQuery();
+    my $query = Foswiki::Func::getCgiQuery();
     my $postChangeRequest = $query->param('postChangeRequest') || '';
     if ($postChangeRequest) {
         return _handlePostChangeRequest( 'delete', $deleteTag, undef, $note );
@@ -1563,8 +1608,8 @@ sub _deleteTag {
 # same as above but to be used inlinr on a topic, for some styles
 sub _deleteTheTag {
     my ($attr) = @_;
-    my $deleteTag = TWiki::Func::extractNameValuePair( $attr, 'tag' );
-    my $note = TWiki::Func::extractNameValuePair( $attr, 'note' ) || '';
+    my $deleteTag = $attr->{tag} || '';
+    my $note = $attr->{note} || '';
 
     return _htmlErrorFeedbackChangeMessage( 'delete', $note ) if !_canChange();
 
@@ -1586,8 +1631,8 @@ sub _wrapHtmlFeedbackMessage {
 # =========================
 sub _wrapHtmlErrorFeedbackMessage {
     my ( $text, $note ) = @_;
-    return _wrapHtmlFeedbackMessage( "<span class=\"twikiAlert\">$text</span>",
-        $note );
+    return _wrapHtmlFeedbackMessage(
+        "<span class=\"foswikiAlert\">$text</span>", $note );
 }
 
 # =========================
@@ -1599,7 +1644,7 @@ sub _wrapHtmlFeedbackInline {
 # =========================
 sub _wrapHtmlFeedbackErrorInline {
     my ($text) = @_;
-    return _wrapHtmlFeedbackInline("<span class=\"twikiAlert\">$text</span>");
+    return _wrapHtmlFeedbackInline("<span class=\"foswikiAlert\">$text</span>");
 }
 
 # =========================
@@ -1662,7 +1707,7 @@ sub _handleMakeText {
 ### my( $text ) = @_; # do not uncomment, use $_[0] instead
 
     # for compatibility with TWiki 3
-    return unless ( $TWiki::Plugins::VERSION < 1.1 );
+    return unless ( $Foswiki::Plugins::VERSION < 1.1 );
 
     # very crude hack to remove MAKETEXT{"...."}
     # Note: parameters are _not_ supported!
@@ -1672,28 +1717,15 @@ sub _handleMakeText {
 # =========================
 sub _writeDebug {
     my ($text) = @_;
-    TWiki::Func::writeDebug("- ${pluginName}: $text") if $debug;
+    Foswiki::Func::writeDebug("- ${pluginName}: $text") if $debug;
 }
 
 # =========================
 sub _writeLog {
-    my ($theText) = @_;
     if ($logAction) {
-        $TWiki::Plugins::SESSION
-          ? $TWiki::Plugins::SESSION->writeLog( "tagme", "$web.$topic",
-            $theText )
-          : TWiki::Store::writeLog( "tagme", "$web.$topic", $theText );
-        _writeDebug("TAGME action, $web.$topic, $theText");
+        $Foswiki::Plugins::SESSION->logger->log(
+            'info', 'tagme', "$web.$topic", @_ );
     }
 }
 
-# =========================
-sub _isGroupMember {
-    my $group = shift;
-    
-    return TWiki::Func::isGroupMember ( $group, undef ) if $TWiki::Plugins::VERSION >= 1.2;
-    return $TWiki::Plugins::SESSION->{user}->isInList($group);
-}
-
-# =========================
 1;

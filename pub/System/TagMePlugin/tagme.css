@@ -20,12 +20,12 @@ a.tagmeAction:hover {
 	white-space:nowrap;
 }
 div.tagMeNotification {
-	padding:.5em 20px; /* side padding same as twikiFormStep (assuming PatternSkin) */
+	padding:.5em 20px; /* side padding same as foswikiFormStep (assuming PatternSkin) */
 	margin:1em 0;
 }
 .tagMeVoteCount {
 	margin:0 .25em;
-	color:#8E9195; /* use twikiGrayText color */
+	color:#8E9195; /* use foswikiGrayText color */
 }
 .tagmeNavigation a {
 	text-decoration:none;

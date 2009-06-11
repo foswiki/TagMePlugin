@@ -18,9 +18,9 @@
 Create a new tag - then add it to a topic.
 
 <noautolink>%TAGME{ tpaction="%URLPARAM{"newaction" default="nop"}%" tag="%URLPARAM{newtag}%" note="%URLPARAM{newtagnote}%" }%<form name="addtag" action="%SCRIPTURL{viewauth}%/%BASEWEB%/%BASETOPIC%" method="post" onsubmit="return cleanTag(this.newtag.value);">
-<div class="twikiFormSteps">
-<div class="twikiFormStep twikiLast">
-Name of new tag: <input type="text" class="twikiInputField" name="newtag" id="newtag" size="30" value="%URLPARAM{"createtag"}%" onblur="this.value=cleanTag(this.value)" /> <input type="submit" class="twikiSubmit" value="%MAKETEXT{"Create"}%" />
+<div class="foswikiFormSteps">
+<div class="foswikiFormStep foswikiLast">
+Name of new tag: <input type="text" class="foswikiInputField" name="newtag" id="newtag" size="30" value="%URLPARAM{"createtag"}%" onblur="this.value=cleanTag(this.value)" /> <input type="submit" class="foswikiSubmit" value="%MAKETEXT{"Create"}%" />
 </div>
 </div>
 <input type="hidden" name="newaction" value="newtag" />
@@ -36,7 +36,7 @@ Existing tags: %TAGME{ tpaction="showalltags" format="[[%SCRIPTURL{view}%/%SYSTE
 %STOPINCLUDE%
 
 %BR%
-<span class="twikiGrayText">Other tag options: [[TagMeViewAllTags][View all tags]], [[TagMeViewMyTags][View my tags]], [[TagMeSearch][Search tags]]</span>
+<span class="foswikiGrayText">Other tag options: [[TagMeViewAllTags][View all tags]], [[TagMeViewMyTags][View my tags]], [[TagMeSearch][Search tags]]</span>
 
 %STARTSECTION{"cleanTagJavascript"}%
 <script language="javascript" type="text/javascript">

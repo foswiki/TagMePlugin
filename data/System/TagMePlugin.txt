@@ -1,11 +1,6 @@
-%META:TOPICINFO{author="ProjectContributor" date="1163536597" format="1.0" version="1.1"}%
 ---+!! Tag-me Plugin
 
 Plugin to tag wiki content collectively in order to find content by tags and to get a meaningful page ranking.
-
-<div class="twikiNotification" style="padding:.5em 20px; margin:1em 0; background-color:#ffc;">
-__Note__: (TWiki 4.2) If you have upgraded !TagMePlugin and appear to have lost all your old tags: copy all your tag files from =pub/TWiki/TagMePlugin/= files to =working/work_areas/TagMePlugin/= and they should magically re-appear.
-</div>
 
 %TOC%
 
@@ -17,7 +12,7 @@ The larger a wiki gets, the harder it is to find content. This wiki tagging plug
 	* Assertion 2: Let the individuals build their own taxonomy to find content quickly
 	* Assertion 3: Let the users do the ranking to get an "human intelligence" ranking of important content
 
-There are clear benefits in tagging content in a large TWiki (10K or more topics):
+There are clear benefits in tagging content in a large wiki (10K or more topics):
 
 	* Find relevant content in a large system quickly,
 		* by quickly accessing related topics via the tags on a topic
@@ -43,9 +38,9 @@ The design goals of the <nop>%TOPIC% were as follows:
 
 Every topic has a list showing all tags associated with the topic. Additional tags can be added to the topic, and new tags can be created.
 
----++++ Default "twiki" style
+---++++ Default style
 Screenshot of tags shown on a topic:
-<div class="twikiImage"><img src="%ATTACHURLPATH%/topictags.gif" alt="Screenshot of tags on a topic"  width="451" height="26" /></div>
+<div class="foswikiImage"><img src="%ATTACHURLPATH%/topictags.gif" alt="Screenshot of tags on a topic"  width="451" height="26" /></div>
 
 You see:
 	* a list of tags with vote count and add/remove vote buttons,
@@ -57,12 +52,12 @@ You see:
 But the same control can have a different look and feel if we specify 
 =style="blog"=. In view mode it has a terse apperance:
 
-<div class="twikiImage"><img src="%ATTACHURLPATH%/topictags_styleblog.gif" alt="Screenshot of tags on a topic, style=blog"  width="490" height="163" /></div>
+<div class="foswikiImage"><img src="%ATTACHURLPATH%/topictags_styleblog.gif" alt="Screenshot of tags on a topic, style=blog"  width="490" height="163" /></div>
 
 But, if you click on Tags, and that you have an account and can edit tags, you
 will see:
 
-<div class="twikiImage"><img src="%ATTACHURLPATH%/topictags_styleblog_open.gif" alt="Screenshot of tags on a topic, style=blog"  width="489" height="464" /></div>
+<div class="foswikiImage"><img src="%ATTACHURLPATH%/topictags_styleblog_open.gif" alt="Screenshot of tags on a topic, style=blog"  width="489" height="464" /></div>
 
 
 ---+++ Create, Rename, Delete tags
@@ -103,7 +98,7 @@ Use the url parameter =deletetag=my+tag+name= to pass the to-be-deleted tag name
 %SYSTEMWEB%.TagMeViewAllTags shows all tags used in the system. The font size indicates the overall tag count of a tag.
 
 Screenshot of tag cloud in the list all tags view:
-<div class="twikiImage">
+<div class="foswikiImage">
 <img src="%ATTACHURLPATH%/alltagcloud.gif" alt="Screenshot of view all tags tag cloud" width="650" height="200"  />
 </div>
 
@@ -129,7 +124,7 @@ The Plugin handles a =%<nop>TAGME{}%= variable that performs different actions. 
 
 	* =%<nop>TAGME{ tpaction="show" ...}%= - shows the tag list on topic
 	  | *Parameter* | *Comment* | *Default* |
-	  | =style="blog"= | will expand into a "tag edit" frame that allows tag management as commonly found in blogs or tag systems like delicious, but only if tpaction is actually present. If =tpaction= is omitted, but the style is ="blog"=, will show nothing. Thus a button to make the edit tags frame appear can be put as: <br /> =&lt;a href="%<nop>SCRIPTURL{viewauth}%/%<nop>WEB%/%<nop>TOPIC%?tpaction=show"&gt;Edit tags&lt;/a&gt;= | "twiki" | 
+	  | =style="blog"= | will expand into a "tag edit" frame that allows tag management as commonly found in blogs or tag systems like delicious, but only if tpaction is actually present. If =tpaction= is omitted, but the style is ="blog"=, will show nothing. Thus a button to make the edit tags frame appear can be put as: <br /> =&lt;a href="%<nop>SCRIPTURL{viewauth}%/%<nop>WEB%/%<nop>TOPIC%?tpaction=show"&gt;Edit tags&lt;/a&gt;= | "foswiki" | 
 	  | =label=", "= | (for style=blog) link label (text) to open the edit tags form | =""= |
 	  | =button=", "= | (for style=blog) the complete button, link or html construct that will be shown when not in edit tag mode. Should open the Edit tag form when clicked by redirection to this same topic with a =tpaction=show= added. Overrides =label=. | =""= |
 	  | =header="..."= | (for style=blog) Printed before the edit tags form if it is not empty, =$n= can be used for newlines. e.g: =header="Manage your tags: &lt;i&gt;"= | =""= |
@@ -210,18 +205,11 @@ Attach ones, in the same style, on the upper right:
    * Set S<nop>KIN = tagme_styleblogbutton,pattern
 </pre>
 
-<div class="twikiNotification" style="padding:.5em 20px; margin:1em 0; background-color:#ffc;">
-*For TWiki 4.1, use:*
-<pre>
-   * Set S<nop>KIN = tagme04x01,pattern
-</pre>
-</div>
-
 ---+++ Customizing the appearance
 If you customize your site you probably want to change overall appearance. You can find instructions how to do that - at least for default pattern skin - in [[%SYSTEMWEB%.PatternSkinCssCookbook]]. %BR%
 The short summary is:
    * Create an empty CSS file, for instance =sitestyle.css=
-   * Copy the CSS styles for =tagmetags= (see below at [[%TOPIC%#ExampleStyle][Example styles used on twiki.org]]) into the file
+   * Copy the CSS styles for =tagmetags= (see below at [[%TOPIC%#ExampleStyle][Example styles]]) into the file
    * Attach the file to [[%USERSWEB%.SitePreferences]]
    * In [[%USERSWEB%.SitePreferences]], write: 
    <verbatim>
@@ -286,7 +274,7 @@ This CSS style is included in =tagme.css=:
 </verbatim>
 
 #ExampleStyle
----+++ Example styles used on twiki.org
+---+++ Example styles
 To show the 'tags shown on a topic': 
 
 <verbatim>
@@ -323,81 +311,47 @@ CSS styles:
 #PluginSettings
 ---++ Plugin Settings
 
-Plugin settings are stored as preferences variables. To reference a plugin setting write ==%<nop>&lt;plugin&gt;_&lt;setting&gt;%==, e.g., ==%<nop>TAGMEPLUGIN_SHORTDESCRIPTION%==
+Plugin settings are stored as preferences. To reference a plugin setting write ==%<nop>&lt;plugin&gt;_&lt;setting&gt;%==, e.g., ==%<nop>TAGMEPLUGIN_SHORTDESCRIPTION%==
 
-	* One line description, is shown in the %SYSTEMWEB%.TextFormattingRules topic:
-		* Set SHORTDESCRIPTION = Tag wiki content collectively to find content by keywords
-
-	* Log add/create actions:
-		* Set LOGACTION = 1
-
-	* Optionally normalize tag names. Set to 1 to translate international characters to their latin match (&uuml; to ue, &aring; to aa, etcetera), and to convert spaces to underscores. %BR%
-	Set to 0 to allow any user input, except for the reserved characters =,#'"|*=. %BR%
-	Setting to 0 also sorts tags case insensitive: 'U' comes after 't'.
-		* Set NORMALIZE_TAG_INPUT = 0
-
-	* If 1, then the =refine= parameter is always added to TAGME queries.
-		* Set ALWAYS_REFINE = 1
-
-	* List of users and groups that are allowed to change (rename and delete) tags (names separated by commas). %BR%
-	Users that are not allowed to change post their change requests to TagMeChangeRequests. %BR%
-	If not set anyone can change tags.
-		* Set ALLOW_TAG_CHANGE = Main.AdminGroup
-
-	* Bundles are groups of tags that are presented as menus for
-	  convenience. It is a list of space-separated (or comma-separated
-	  if your tags may contain spaces) prefixed by bundle labels
-	  terminated by colon (":"). e.g:
-		* Set BUNDLES =
-		* #Set BUNDLES = Rating: * ** ** Todo: to_blog to_read
-		* #Set BUNDLES = Rating:, *, **, **, Todo:, to_blog, to_read
+NOTE: In a change from previous releases, preferences *cannot* be set in this
+topic. Use the standard preference setting topics, such as
+%USERSWEB%.SitePreferences, instead.
+<!--
+   * Set SHORTDESCRIPTION = Tag wiki content collectively to find content by keywords
+-->
+| *Preference name* | *Meaning* | *Default* |
+| =TAGMEPLUGIN_LOGACTION= | Log add/create actions | 1 |
+| =TAGMEPLUGIN_NORMALIZE_TAG_INPUT= | Optionally normalize tag names. Set to 1 to translate international characters to their latin match (&uuml; to ue, &aring; to aa, etcetera), and to convert spaces to underscores. %BR%	Set to 0 to allow any user input, except for the reserved characters =,#'"|*=. %BR%Setting to 0 also sorts tags case insensitive: 'U' comes after 't'. | 0 |
+| =TAGMEPLUGIN_ALWAYS_REFINE= | If 1, then the =refine= parameter is always added to TAGME queries. | 1 |
+| =TAGMEPLUGIN_ALLOW_TAG_CHANGE= | List of users and groups that are allowed to change (rename and delete) tags (names separated by commas). %BR%	Users that are not allowed to change post their change requests to TagMeChangeRequests. %BR%	If not set anyone can change tags. | Main.AdminGroup |
+| =Set TAGMEPLUGIN_BUNDLES= | Bundles are groups of tags that are presented as menus for convenience. It is a list of space-separated (or comma-separated if your tags may contain spaces) prefixed by bundle labels terminated by colon (":"). e.g:<ol><li>* Set TAGMEPLUGIN_BUNDLES = Rating: * ** ** Todo: to_blog to_read</li><li>* Set BUNDLES = Rating:, *, **, **, Todo:, to_blog, to_read</li></ol> | |
+| =TAGMEPLUGIN_DEBUG= | Generate debug trace in foswiki debug log |
 		
-	* Debug plugin: (See output in =data/debug.txt=)
-		* Set DEBUG = 0
-
 ---++ Plugin Installation Instructions
 
-__Note:__ You do not need to install anything on the browser to use this plugin. The following instructions are for the administrator who installs the Plugin on the TWiki server. 
-
-	* Download the ZIP file from the Plugin web (see below)
-	* Unzip ==%TOPIC%.zip== in your twiki installation directory. Content:
-	  | *File:* | *Description:* |
-	  | ==data/System/%TOPIC%.txt== | Plugin topic |
-	  | ==data/TWiki/TagMeViewAllTags.txt== | Supporting topic to view all tags |
-	  | ==data/TWiki/TagMeViewMyTags.txt== | Supporting topic to view my tags |
-	  | ==data/TWiki/TagMeSearch.txt== | Supporting topic to search for tagged topics |
-	  | ==data/TWiki/TagMeManage.txt== | Supporting topic to create new tags |
-	  | ==data/TWiki/TagMeDebug*.txt== | Supporting topics for debug |
-	  | ==lib/Foswiki/Plugins/%TOPIC%.pm== | Plugin Perl module |
-	  | ==pub/TWiki/%TOPIC%/*.gif== | Icon files |
-	  | ==templates/view.tagme.tmpl== | Template containing GUI components |
-	* Configure and enable the Plugin:
-		* TWiki 4.0 and up: Run the [[%SCRIPTURL%/configure%SCRIPTSUFFIX%][configure]] script to enable the Plugin
-		* Change the Plugin settings as needed:
-			* Determine who will be allowed to rename and delete tags.
-			* For international character support: set =NORMALIZE_TAG_INPUT= to 0.
-			* To allow any user input as tag name also set =NORMALIZE_TAG_INPUT= to 0.
-		* To put the tags interface on every page, see the instructions above at [[%TOPIC%#TagsOnPage][How to put tags on every page]]
-	* Test if the installation was successful:
-		* Go to [[TagMeCreateNewTag]] and add a tag
-
----++ Limitations
-
-	* TWiki 04-Sep-2005 and older: Tags are lost if a topic is renamed or moved.
+%$INSTALL_INSTRUCTIONS%
+   * Change the Plugin settings as needed:
+      * Determine who will be allowed to rename and delete tags.
+      * For international character support: set =TAGMEPLUGIN_NORMALIZE_TAG_INPUT= to 0.
+      * To allow any user input as tag name also set =TAGMEPLUGIN_NORMALIZE_TAG_INPUT= to 0.
+   * To put the tags interface on every page, see the instructions above at [[%TOPIC%#TagsOnPage][How to put tags on every page]]
+   * Test if the installation was successful:
+      * Go to [[TagMeCreateNewTag]] and add a tag
 
 ---++ Plugin Info
 
-|  Plugin Author: | TWiki:Main/PeterThoeny, TWiki:Main/ArthurClemens |
-|  Copyright: | &copy; 2006-2007, Peter Thoeny, [[http://www.twiki.net/][TWIKI.NET]] |
+|  Plugin Author: | Peter Thoeny, Arthur Clemens |
+|  Copyright: | &copy; 2006-2007, Peter Thoeny |
 |  License: | GPL ([[http://www.gnu.org/copyleft/gpl.html][GNU General Public License]]) |
 |  Plugin Version: | 30 Aug 2008 (V1.049) |
 |  Change History: | <!-- versions below in reverse order -->&nbsp; |
+|  11 Jun 2009: | Foswiki port, and moved settings out of this topic |
 |  30 Aug 2008: | Colas Nahaboo: enhancements to the "blog" style: Bundles,
 count of known tags, option to delete tags |
 |  28 Aug 2008: | Colas Nahaboo: prefix & suffix options renamed as header & footer. New parameter style to TAGME to be able to define different UI style for the default "show" action of TAGME. Implemented a first one, "blog" for the simpler case of authors managing the same tags |
 |  26 Aug 2008: | Colas Nahaboo: prefix & suffix options to TAGME |
 |  16 Oct 2007: | Arthur Clemens: added backward compatible example template. |
-|  26 Sep 2007: | TWiki:Main.CrawfordCurrie TWikibug:Item4728 fixed incorrect cloud font sizes to reflect relative importance of tags actually being displayed |
+|  26 Sep 2007: | Foswiki:Main.CrawfordCurrie Item4728 fixed incorrect cloud font sizes to reflect relative importance of tags actually being displayed |
 |  11 Sep 2007: | Arthur Clemens: updated example template to TWiki template convention. |
 |  11 Jun 2007: | Arthur Clemens: fixed sizing of tags with the same tag count; fixed CSS class for select box; updated documentation with "How to put tags on every page". |
 |  07 Jun 2007: | Arthur Clemens: removed dependency on (unreleased) TWiki 4.2. |
@@ -426,16 +380,10 @@ count of known tags, option to delete tags |
 |  28 Feb 2006: | Use tabs in all/my/specific tags view; show related tags in specific tags view; check if topic exists when adding tags; |
 |  26 Feb 2006: | Added view all tags / my tags (as tag clouds); view specific tag (sorted by tag count); do not allow guests to create new tags; log add/create tag actions |
 |  20 Feb 2006: | Initial version |
-|  TWiki Dependency: | $TWiki::Plugins::VERSION 1.024 |
-|  CPAN Dependencies: | none |
-|  Other Dependencies: | none |
-|  Perl Version: | 5.005 |
-|  Plugin Home: | http://foswiki.org/Extensions/%TOPIC% |
-|  Feedback: | http://foswiki.org/Extensions/%TOPIC%Dev |
+|  Home: | http://foswiki.org/Extensions/%TOPIC% |
+|  Support: | http://foswiki.org/Support/%TOPIC% |
 
 __Related Topics:__ %SYSTEMWEB%.TagMeViewAllTags, %SYSTEMWEB%.TagMeViewMyTags, %SYSTEMWEB%.TagMeSearch, %SYSTEMWEB%.TagMeDebugViewTags, %SYSTEMWEB%.TagMeDebugSearch, [[%SYSTEMWEB%.Plugins][Plugins]], %SYSTEMWEB%.DeveloperDocumentationCategory, %SYSTEMWEB%.AdminDocumentationCategory, %SYSTEMWEB%.DefaultPreferences, %USERSWEB%.SitePreferences
-
--- TWiki:Main.PeterThoeny - 16 Oct 2007
 
 %META:FILEATTACHMENT{name="tag_add.gif" attr="h" comment="Button: add tag" date="1141691885" path="tag_add.gif" size="857" user="ProjectContributor" version="1.1"}%
 %META:FILEATTACHMENT{name="tag_remove.gif" attr="h" comment="Button: remove tag" date="1141697484" path="tag_remove.gif" size="862" user="ProjectContributor" version="1.1"}%
