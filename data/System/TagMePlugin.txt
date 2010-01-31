@@ -59,6 +59,21 @@ will see:
 
 <div class="foswikiImage"><img src="%ATTACHURLPATH%/topictags_styleblog_open.gif" alt="Screenshot of tags on a topic, style=blog"  width="489" height="464" /></div>
 
+---++++ "ajax" option
+An experimental interactive user interface is also provided, implemented using the latest version of JQueryPlugin in TagMeAjaxHelper.
+
+Include it into your WebTopBar (See WebTopBarExample) or any part of your skin that has horizontal space to spare, as follows:
+<verbatim class="tml">%INCLUDE{"%SYSTEMWEB%.TagMeAjaxHelper" section="jqui"}%</verbatim>
+
+<div class="foswikiImage"><img src="%ATTACHURLPATH%/jqui.png" alt="Screenshot of experimental jQuery UI"  width="522" height="156" /></div>
+
+Dependencies:
+   * JQueryPlugin
+      * =textboxlist=
+      * =simplemodal=
+      * =autocomplete=
+      * =hoverintent=
+   * FilterPlugin
 
 ---+++ Create, Rename, Delete tags
 
@@ -317,7 +332,7 @@ NOTE: In a change from previous releases, preferences *cannot* be set in this
 topic. Use the standard preference setting topics, such as
 %USERSWEB%.SitePreferences, instead.
 <!--
-   * Set SHORTDESCRIPTION = Tag wiki content collectively to find content by keywords
+   * Set SHORTDESCRIPTION = %$SHORTDESCRIPTION%
 -->
 | *Preference name* | *Meaning* | *Default* |
 | =TAGMEPLUGIN_LOGACTION= | Log add/create actions | 1 |
@@ -343,11 +358,12 @@ topic. Use the standard preference setting topics, such as
 |  Plugin Author: | Peter Thoeny, Arthur Clemens |
 |  Copyright: | &copy; 2006-2007, Peter Thoeny |
 |  License: | GPL ([[http://www.gnu.org/copyleft/gpl.html][GNU General Public License]]) |
-|  Plugin Version: | 30 Aug 2008 (V1.049) |
+|  Version: | %$VERSION% |
+|  Release: | %$RELEASE% |
 |  Change History: | <!-- versions below in reverse order -->&nbsp; |
+|  31 Jan 2010: | [[Main.PaulHarvey][Paul Harvey]]: Added an interactive user interface implemented with JQuery |
 |  11 Jun 2009: | Foswiki port, and moved settings out of this topic |
-|  30 Aug 2008: | Colas Nahaboo: enhancements to the "blog" style: Bundles,
-count of known tags, option to delete tags |
+|  30 Aug 2008: | Colas Nahaboo: enhancements to the "blog" style: Bundles, count of known tags, option to delete tags |
 |  28 Aug 2008: | Colas Nahaboo: prefix & suffix options renamed as header & footer. New parameter style to TAGME to be able to define different UI style for the default "show" action of TAGME. Implemented a first one, "blog" for the simpler case of authors managing the same tags |
 |  26 Aug 2008: | Colas Nahaboo: prefix & suffix options to TAGME |
 |  16 Oct 2007: | Arthur Clemens: added backward compatible example template. |
@@ -380,11 +396,12 @@ count of known tags, option to delete tags |
 |  28 Feb 2006: | Use tabs in all/my/specific tags view; show related tags in specific tags view; check if topic exists when adding tags; |
 |  26 Feb 2006: | Added view all tags / my tags (as tag clouds); view specific tag (sorted by tag count); do not allow guests to create new tags; log add/create tag actions |
 |  20 Feb 2006: | Initial version |
-|  Home: | http://foswiki.org/Extensions/%TOPIC% |
-|  Support: | http://foswiki.org/Support/%TOPIC% |
+|  Home: | Foswiki:Extensions/%TOPIC% |
+|  Support: | Foswiki:Support/%TOPIC% |
 
-__Related Topics:__ %SYSTEMWEB%.TagMeViewAllTags, %SYSTEMWEB%.TagMeViewMyTags, %SYSTEMWEB%.TagMeSearch, %SYSTEMWEB%.TagMeDebugViewTags, %SYSTEMWEB%.TagMeDebugSearch, [[%SYSTEMWEB%.Plugins][Plugins]], %SYSTEMWEB%.DeveloperDocumentationCategory, %SYSTEMWEB%.AdminDocumentationCategory, %SYSTEMWEB%.DefaultPreferences, %USERSWEB%.SitePreferences
+__Related Topics:__ %SYSTEMWEB%.TagMeViewAllTags, %SYSTEMWEB%.TagMeViewMyTags, %SYSTEMWEB%.TagMeSearch, %SYSTEMWEB%.TagMeDebugViewTags, %SYSTEMWEB%.TagMeDebugSearch, %SYSTEMWEB%.TagMeAjaxHelper, [[%SYSTEMWEB%.Plugins][Plugins]], %SYSTEMWEB%.DeveloperDocumentationCategory, %SYSTEMWEB%.AdminDocumentationCategory, %SYSTEMWEB%.DefaultPreferences, %USERSWEB%.SitePreferences
 
+%META:FILEATTACHMENT{name="jqui.png" attr="h" comment="Screenshot of experimental jQuery UI" date="1264982400" path="jqui.png" size="16289" user="ProjectContributor" version="1.1"}%
 %META:FILEATTACHMENT{name="tag_add.gif" attr="h" comment="Button: add tag" date="1141691885" path="tag_add.gif" size="857" user="ProjectContributor" version="1.1"}%
 %META:FILEATTACHMENT{name="tag_remove.gif" attr="h" comment="Button: remove tag" date="1141697484" path="tag_remove.gif" size="862" user="ProjectContributor" version="1.1"}%
 %META:FILEATTACHMENT{name="alltagcloud.gif" attr="h" comment="Screenshot of view all tags tag cloud" date="1141693726" path="alltagcloud.gif" size="8087" user="ProjectContributor" version="1.1"}%

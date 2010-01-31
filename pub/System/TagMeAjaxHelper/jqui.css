@@ -1,0 +1,22 @@
+#tagmejqcontainer {
+}
+#tagmejqtagstatus, #tagmejqtag {
+  float: left;
+}
+#tagmejqtagstatus {
+	width: 16px;
+}
+#tagmejqtagstatus.spinning {
+	background-image: url('spinner.gif');
+  background-repeat: no-repeat;
+}
+#tagmejqtag.spinning {
+  background-image: url('cloudspinner.gif');
+}
+#tagmejqtag {
+	background-image: url('tag.png');
+	background-position: right;
+  background-repeat: no-repeat;
+	padding-right: 16px;
+	margin-right: 0.5em;
+}

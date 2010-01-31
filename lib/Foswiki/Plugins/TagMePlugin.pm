@@ -35,7 +35,7 @@ use vars qw(
 );
 
 our $VERSION           = '$Rev$';
-our $RELEASE           = '11 Jun 2009';
+our $RELEASE           = '01 Feb 2010';
 our $NO_PREFS_IN_TOPIC = 1;
 our $SHORTDESCRIPTION =
   'Tag wiki content collectively to find content by keywords';

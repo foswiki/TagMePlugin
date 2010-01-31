@@ -1,0 +1,35 @@
+%META:TOPICPARENT{name="TagMePlugin"}%
+%STARTSECTION{"tagquery"}%
+%FORMATLIST{
+   "%TAGME{tpaction="showalltags" separator=","}%"
+   format="$1$n"
+   separator=" "
+   include=".*%URLPARAM{"q"}%.*"
+}%
+%ENDSECTION{"tagquery"}%
+%STARTSECTION{"jqui"}%%JQREQUIRE{"textboxlist"}%%JQREQUIRE{"autocomplete"}%%JQREQUIRE{"simplemodal"}%%JQREQUIRE{"hoverintent"}%%ADDTOHEAD{
+   "TAGMEPLUGIN::JQUI"
+   text="<meta name='foswiki.TagMePlugin.jquitags'
+       content='%TAGME{tpaction="%URLPARAM{"tpaction" default="showalltags"}%"
+         tag="%URLPARAM{"tptag"}%" web="%BASEWEB%" topic="%BASETOPIC%" separator=","}%'
+     /><script type='text/javascript' src='%PUBURLPATH%/%SYSTEMWEB%/%TOPIC%/jqui.js'></script>
+     <link rel='stylesheet' href='%PUBURLPATH%/%SYSTEMWEB%/TagMeAjaxHelper/jqui.css'
+     type='text/css' media='all'/>" 
+   requires="JQUERYPLUGIN::TEXTBOXLIST, JQUERYPLUGIN::AUTOCOMPLETE, JQUERYPLUGIN::SIMPLEMODAL, JQUERYPLUGIN::HOVERINTENT"
+}%<div id='tagmejqcontainer'><span id="tagmejqtagstatus">&nbsp;</span><div id="tagmejqcloud" style="display:none"></div><a id="tagmejqtag" href="%SCRIPTURLPATH{"view"}%/%SYSTEMWEB%/TagMeViewAllTags">%MAKETEXT{"Tags"}%&nbsp;</a><form name="tagmeshow" method="post" action="%SCRIPTURLPATH{"viewauth"}%/%WEB%/%TOPIC%">
+   <input type="text" name="add" id="tagmejqinputfield" title="%MAKETEXT{"Enter a tag name to apply to this topic"}%" size="15" value="%TAGME{ tpaction="showalltags" web="%BASEWEB%" topic="%BASETOPIC%"}%"/> 
+</form></div>%ENDSECTION{"jqui"}%
+
+%STARTSECTION{"cloud"}%<form id="tagmeWebSelect" method="post" action="%SCRIPTURLPATH{"view"}%/%WEB%/%TOPIC%">
+Tags:
+  <input type="checkbox" id="tagmeCheckboxJustThisWeb" name="web" value="%BASEWEB%" checked="checked"/>
+  <label for="web">from just this web</label>
+  <input type="checkbox" id="tagmeCheckboxJustMe" name="user" value="me"/>
+  <label for="web">set by me</label>
+</form><div id="tagmeTagCloud" style="line-height:2em;">
+%TAGME{tpaction="showalltags" web="%URLPARAM{"tpweb"}%" by="%URLPARAM{"tpuser"}%" format="<a href=\"%SCRIPTURLPATH{"view"}%/%SYSTEMWEB%/TagMeSearch?tag=$tag;by=%URLPARAM{ "by" }%\" style=\"font-size:$size%\">$tag</a>" separator="&nbsp; "  minsize="94" maxsize="220" by="%URLPARAM{ "tpuser" }%" }%
+</div>%ENDSECTION{"cloud"}%
+
+<!--
+   * Set NOWYSIWYG = 1
+-->

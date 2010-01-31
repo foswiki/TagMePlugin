@@ -15,5 +15,14 @@ pub/System/TagMePlugin/tag_addnew.gif 0644
 pub/System/TagMePlugin/tag_remove.gif 0644
 pub/System/TagMePlugin/tagme.css 0644
 pub/System/TagMePlugin/topictags.gif 0644
-templates/view.tagme.tmpl 0444
-
+pub/System/TagMePlugin/jqui.png 0644
+templates/view.tagme.tmpl 0644
+templates/view.tagme_styleblogbutton.tmpl 0644
+templates/view.tagme_styleblog.tmpl 0644
+templates/view.tagmejquiajax.tmpl 0644
+pub/System/TagMeAjaxHelper/jqui.js 0644
+pub/System/TagMeAjaxHelper/jqui.css 0644
+pub/System/TagMeAjaxHelper/tag.png 0644 From FamFamFamSilkIcons
+pub/System/TagMeAjaxHelper/spinner.gif 0644 From http://www.ajaxload.info
+pub/System/TagMeAjaxHelper/cloudspinner.gif 0644 From http://www.ajaxload.info
+data/System/TagMeAjaxHelper.txt 0644
