@@ -1,7 +1,16 @@
 #tagmejqcontainer {
 }
+
 #tagmejqtagstatus, #tagmejqtag {
   float: left;
+}
+#tagmejqtag {
+	text-decoration: underline;
+}
+#tagmejqtag:hover {
+  color: #C0FFC0; 
+	background-color: #778899;
+	cursor: pointer;
 }
 #tagmejqtagstatus {
 	width: 16px;
