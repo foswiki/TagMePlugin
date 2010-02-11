@@ -1,6 +1,6 @@
-#tagmejqcontainer {
+#tagmeTagCloud {
+  padding-top: 1em;
 }
-
 #tagmejqtagstatus, #tagmejqtag {
   float: left;
 }

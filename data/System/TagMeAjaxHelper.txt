@@ -12,8 +12,8 @@
    text="<meta name='foswiki.TagMePlugin.jquitags'
        content='%TAGME{tpaction="%URLPARAM{"tpaction" default="showalltags"}%"
          tag="%URLPARAM{"tptag"}%" web="%BASEWEB%" topic="%BASETOPIC%" separator=","}%'
-     /><script type='text/javascript' src='%PUBURLPATH%/%SYSTEMWEB%/%TOPIC%/jqui.js'></script>
-     <link rel='stylesheet' href='%PUBURLPATH%/%SYSTEMWEB%/TagMeAjaxHelper/jqui.css'
+     /><script type='text/javascript' src='%PUBURLPATH%/%SYSTEMWEB%/%TOPIC%/jquery.tagmeui.js'></script>
+     <link rel='stylesheet' href='%PUBURLPATH%/%SYSTEMWEB%/TagMeAjaxHelper/jquery.tagmeui.css'
      type='text/css' media='all'/>" 
    requires="JQUERYPLUGIN::TEXTBOXLIST, JQUERYPLUGIN::AUTOCOMPLETE, JQUERYPLUGIN::SIMPLEMODAL, JQUERYPLUGIN::HOVERINTENT, JQUERYPLUGIN::QUERYOBJECT"
 }%<div id='tagmejqcontainer'><span id="tagmejqtagstatus">&nbsp;</span>
@@ -29,7 +29,6 @@
   then="%MAKETEXT{"all webs"}%"
   else="%MAKETEXT{"[[[_1].WebHome][[_1]]] web" args="%URLPARAM{"tpweb"}%"}%"
 }%
-<br/>
 <form id="tagmeWebSelect" method="post" action="%SCRIPTURLPATH{"view"}%/%WEB%/%TOPIC%">
   <input type="checkbox" id="tagmeCheckboxJustThisWeb" name="tpweb"\
     value="%URLPARAM{"tpweb"}%" %IF{"'%URLPARAM{"tpweb"}%'=''" then="checked='checked'"}%\

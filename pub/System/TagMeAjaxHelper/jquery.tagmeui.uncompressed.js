@@ -15,7 +15,7 @@
  * more details, published at http://www.gnu.org/copyleft/gpl.html 
  *
  * @author: Paul Harvey <Paul.W.Harvey@csiro.au>
- * @date:   2010-02-10
+ * @date:   2010-02-11
  * @see:    http://foswiki.org/Extensions/TagMePlugin#jqui
  */
 
@@ -24,6 +24,15 @@
 jQuery(document).ready(function () {
 	(function ($) {
 		$.fn.tagmeui = function (options) {
+            /* TODO: 
+             * - Prevent multiple instantiations on DOM elements.
+             * - There isn't much need for this.each/chaining. Re-factor to use
+             *   jquery metadata plugin, and so opts can be extracted from DOM 
+             *   element. Eg: $('#myTagMeDivWithMetaData').tagmeui({extra: 'opts'});
+             * - Modify TagMePlugin itself to support hard removal of tags,
+             *   instead of the bogus vote count subtraction currently 
+             * - There is no meaningful feedback to user if ajax calls fail 
+             *   (auth/permissions, etc) */
 			$(this).each(function () {
 				var tagmeui = new TagMeUI($(this), options);
 				
@@ -37,7 +46,7 @@ jQuery(document).ready(function () {
 			var that = this;
 			
 			this.caller = caller;
-			this.urlQuery = $.parsequery(window.location.search);
+			this.urlQuery = $.query;
 			this.cloudQuery = this.urlQuery.copy();
 			this.cloudQuery.SET('skin', 'text');
 			this.cloudQuery.SET('contenttype', 'text/plain');
@@ -85,6 +94,7 @@ jQuery(document).ready(function () {
 				taglistInputField: '#tagmejqinputfield',
 				tagLinkUrl: foswiki.scriptUrlPath + '/view/' + 
 					foswiki.systemWebName + '/TagMeSearch',
+                tagLinkTitle: 'Other topics with this tag',
 				tagPostUrl: foswiki.scriptUrlPath + '/viewauth/' + foswiki.web + 
 					'/' + foswiki.topic,
 				autocompleteUrl: foswiki.scriptUrlPath + '/view/' + 
@@ -138,7 +148,8 @@ jQuery(document).ready(function () {
 			var that = this;
 			$(selector + ' > form > div.jqTextboxListContainer > span:not(.linkified)').each(
 				function (index, tagSpan) {
-					var tagQuery = $.parsequery().copy();
+					var tagQuery = $.query.copy(),
+                        theTag = $(tagSpan).text();
 					
 					/* There must be an easier way to remove the textNode from a span; but
 					** I don't know it... yet. .text('') destroys child elements we want to
@@ -155,20 +166,21 @@ jQuery(document).ready(function () {
 						return;
 					}
 
-					theTag = $(tagSpan).text();
 					tagQuery.SET('tag', theTag);
 					tagQuery.SET('qcallingweb', foswiki.web);
 					removeTextNodes(tagSpan);
 					$(tagSpan).append('<a href="' + that.settings.tagLinkUrl + 
-						tagQuery.toString() + '" title="Other topics with this tag">' + 
-						theTag + '</a>');
+						tagQuery.toString() + '" title="' + 
+                        that.settings.tagLinkTitle + '">' + theTag + '</a>');
 					$(tagSpan).addClass('linkified');
 				}
 			);
 
 			return;
 		};
-
+        
+        /* Populates a hidden div with the tag cloud and then displays it 
+         * with simplemodal. Some messiness to bind events on the cloud modal */
 		TagMeUI.prototype.loadCloud = function () {
 			var that = this;
 		
@@ -181,6 +193,8 @@ jQuery(document).ready(function () {
 					}
 				}
 				
+                /* Would be nice if simplemodal had more sensible autosizing 
+                 * with content. */
 				if ($('#simplemodal-container').width() > $(document).width() - 50) {
 					$('#simplemodal-container').width($(document).width() - 50);
 				}
@@ -244,7 +258,6 @@ jQuery(document).ready(function () {
 				},
 
 				autocomplete: this.settings.autocompleteUrl,
-
 				autocompleteOpts: this.settings.autocompleteOpts
 			});
 			
@@ -255,6 +268,8 @@ jQuery(document).ready(function () {
 			});
 		};
 		
-		$.fn.tagmeui();
 	}(jQuery));
+    
+    /* Install tagmeui using default options */
+    $.fn.tagmeui();
 });

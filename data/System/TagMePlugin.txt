@@ -59,20 +59,32 @@ will see:
 
 <div class="foswikiImage"><img src="%ATTACHURLPATH%/topictags_styleblog_open.gif" alt="Screenshot of tags on a topic, style=blog"  width="489" height="464" /></div>
 
----++++ "ajax" option
+---++++ "jqui"
 An experimental interactive user interface is also provided, implemented using the latest version of JQueryPlugin in TagMeAjaxHelper.
+
+All features work without having to re-load the topic:
+   * Auto-complete tag names. Saves newly selected tags immediately
+   * If auto-complete fails to match the entered tag and the user submits
+     it, the tag is immediately created and applied
+   * Access tag cloud in a modal dialogue at the click of a button. Check-box
+     toggles are applied immediately (show cloud for just this web/all webs,
+     just my tags/all tags)
+   * Clicking a tag from the topic's tag list or tag cloud takes you to
+     the TagMeSearch topic, where the tag cloud will still be generated
+     from the originating web (avoids reliance on browser back button
+     when exploring a web via tag cloud)
 
 Include it into your WebTopBar (See WebTopBarExample) or any part of your skin that has horizontal space to spare, as follows:
 <verbatim class="tml">%INCLUDE{"%SYSTEMWEB%.TagMeAjaxHelper" section="jqui"}%</verbatim>
 
-<div class="foswikiImage"><img src="%ATTACHURLPATH%/jqui.png" alt="Screenshot of experimental jQuery UI"  width="522" height="156" /></div>
+<div class="foswikiImage"><img src="%ATTACHURLPATH%/jquery.tagmeui.png" alt="Screenshot of experimental jQuery UI"  width="522" height="156" /></div>
 
 Dependencies:
    * JQueryPlugin
-      * =textboxlist=
-      * =simplemodal=
-      * =autocomplete=
-      * =hoverintent=
+      * [[JQueryTextboxList][textboxlist]]
+      * [[JQuerySimpleModal][simplemodal]]
+      * [[JQueryAutocomplete][autocomplete]]
+      * [[JQueryQueryObject][queryobject]]
    * FilterPlugin
 
 ---+++ Create, Rename, Delete tags
@@ -361,25 +373,25 @@ topic. Use the standard preference setting topics, such as
 |  Version: | %$VERSION% |
 |  Release: | %$RELEASE% |
 |  Change History: | <!-- versions below in reverse order -->&nbsp; |
-|  31 Jan 2010: | [[Main.PaulHarvey][Paul Harvey]]: Added an interactive user interface implemented with JQuery |
+|  31 Jan 2010: | Foswiki:Main.PaulHarvey: Added an interactive user interface implemented with JQuery |
 |  11 Jun 2009: | Foswiki port, and moved settings out of this topic |
-|  30 Aug 2008: | Colas Nahaboo: enhancements to the "blog" style: Bundles, count of known tags, option to delete tags |
-|  28 Aug 2008: | Colas Nahaboo: prefix & suffix options renamed as header & footer. New parameter style to TAGME to be able to define different UI style for the default "show" action of TAGME. Implemented a first one, "blog" for the simpler case of authors managing the same tags |
-|  26 Aug 2008: | Colas Nahaboo: prefix & suffix options to TAGME |
-|  16 Oct 2007: | Arthur Clemens: added backward compatible example template. |
+|  30 Aug 2008: | Foswiki:Main.ColasNahaboo: enhancements to the "blog" style: Bundles, count of known tags, option to delete tags |
+|  28 Aug 2008: | Foswiki:Main.ColasNahaboo: prefix & suffix options renamed as header & footer. New parameter style to TAGME to be able to define different UI style for the default "show" action of TAGME. Implemented a first one, "blog" for the simpler case of authors managing the same tags |
+|  26 Aug 2008: | Foswiki:Main.ColasNahaboo: prefix & suffix options to TAGME |
+|  16 Oct 2007: | Foswiki:Main.ArthurClemens: added backward compatible example template. |
 |  26 Sep 2007: | Foswiki:Main.CrawfordCurrie Item4728 fixed incorrect cloud font sizes to reflect relative importance of tags actually being displayed |
-|  11 Sep 2007: | Arthur Clemens: updated example template to TWiki template convention. |
-|  11 Jun 2007: | Arthur Clemens: fixed sizing of tags with the same tag count; fixed CSS class for select box; updated documentation with "How to put tags on every page". |
-|  07 Jun 2007: | Arthur Clemens: removed dependency on (unreleased) TWiki 4.2. |
-|  21 May 2007: | TWiki:Main.WillNorris: added =view.tagme.tmpl= and updated installation instructions. |
-|  30 Apr 2007: | Arthur Clemens: fixed calculation of sizes in tag cloud; if =mincount= is passed only the shown tags are calculated. |
-|  18 Apr 2007: | Arthur Clemens: added permissions for rename and delete; added TagMeChangeRequests. |
-|  17 Apr 2007: | TWiki:Main.CrawfordCurrie for [[http://www.escapestudios.co.uk/][Escape Studios]]: contributed support for incremental refinement of tag searches. |
-|  12 Apr 2007: | TWiki:Main.CrawfordCurrie contributed ability to search for multiple tags. TWiki:Main.SvenDowideit for [[http://www.escapestudios.co.uk/][Escape Studios]]: added parameters needed for custom search result display. |
-|  05 Apr 2007: | Arthur Clemens: The "topic tags" select box is now created with Javascript to prevent the tag options getting indexed by search engines. The former select box is used for noscript fallback. |
-|  02 Apr 2007: | Arthur Clemens: Added "Delete Tag" interface. Added tabbed interface for Create, Rename, Delete tags. |
-|  30 Mar 2007: | Arthur Clemens: Added "Rename Tag" interface. |
-|  22 Mar 2007: | Arthur Clemens: Added option =NORMALIZE_TAG_INPUT= (to be set to 0) to allow any word as tag name (including upper case, punctuation characters and spaces). Moved "Create New Tag" to dedicated page. Created CSS styles in =tagme.css=. Added =mincount= parameter to =TAGME{tpaction="showalltags"}=. |
+|  11 Sep 2007: | Foswiki:Main.ArthurClemens: updated example template to TWiki template convention. |
+|  11 Jun 2007: | Foswiki:Main.ArthurClemens: fixed sizing of tags with the same tag count; fixed CSS class for select box; updated documentation with "How to put tags on every page". |
+|  07 Jun 2007: | Foswiki:Main.ArthurClemens: removed dependency on (unreleased) TWiki 4.2. |
+|  21 May 2007: | Foswiki:Main.WillNorris: added =view.tagme.tmpl= and updated installation instructions. |
+|  30 Apr 2007: | Foswiki:Main.ArthurClemens: fixed calculation of sizes in tag cloud; if =mincount= is passed only the shown tags are calculated. |
+|  18 Apr 2007: | Foswiki:Main.ArthurClemens: added permissions for rename and delete; added TagMeChangeRequests. |
+|  17 Apr 2007: | Foswiki:Main.CrawfordCurrie for [[http://www.escapestudios.co.uk/][Escape Studios]]: contributed support for incremental refinement of tag searches. |
+|  12 Apr 2007: | Foswiki:Main.CrawfordCurrie contributed ability to search for multiple tags. TWiki:Main.SvenDowideit for [[http://www.escapestudios.co.uk/][Escape Studios]]: added parameters needed for custom search result display. |
+|  05 Apr 2007: | Foswiki:Main.ArthurClemens: The "topic tags" select box is now created with Javascript to prevent the tag options getting indexed by search engines. The former select box is used for noscript fallback. |
+|  02 Apr 2007: | Foswiki:Main.ArthurClemens: Added "Delete Tag" interface. Added tabbed interface for Create, Rename, Delete tags. |
+|  30 Mar 2007: | Foswiki:Main.ArthurClemens: Added "Rename Tag" interface. |
+|  22 Mar 2007: | Foswiki:Main.ArthurClemens: Added option =NORMALIZE_TAG_INPUT= (to be set to 0) to allow any word as tag name (including upper case, punctuation characters and spaces). Moved "Create New Tag" to dedicated page. Created CSS styles in =tagme.css=. Added =mincount= parameter to =TAGME{tpaction="showalltags"}=. |
 |  14 Nov 2006: | Fix IE browser crash issue on print (forms can't be named "tags"; debug by TWiki:Main.KevinKalmbach) |
 |  14 Oct 2006: | Fix show default problem introduced by version 07 Oct 2006 (contributed by TWiki:Main.ChristianSuenkel) |
 |  07 Oct 2006: | nostatus="on" parameter for add/remove tag (contributed by TWiki:Main.FredMorris) |
@@ -401,7 +413,7 @@ topic. Use the standard preference setting topics, such as
 
 __Related Topics:__ %SYSTEMWEB%.TagMeViewAllTags, %SYSTEMWEB%.TagMeViewMyTags, %SYSTEMWEB%.TagMeSearch, %SYSTEMWEB%.TagMeDebugViewTags, %SYSTEMWEB%.TagMeDebugSearch, %SYSTEMWEB%.TagMeAjaxHelper, [[%SYSTEMWEB%.Plugins][Plugins]], %SYSTEMWEB%.DeveloperDocumentationCategory, %SYSTEMWEB%.AdminDocumentationCategory, %SYSTEMWEB%.DefaultPreferences, %USERSWEB%.SitePreferences
 
-%META:FILEATTACHMENT{name="jqui.png" attr="h" comment="Screenshot of experimental jQuery UI" date="1264982400" path="jqui.png" size="16289" user="ProjectContributor" version="1.1"}%
+%META:FILEATTACHMENT{name="jquery.tagmeui.png" attr="h" comment="Screenshot of experimental jQuery UI" date="1264982400" path="jquery.tagmeui.png" size="16289" user="ProjectContributor" version="1.1"}%
 %META:FILEATTACHMENT{name="tag_add.gif" attr="h" comment="Button: add tag" date="1141691885" path="tag_add.gif" size="857" user="ProjectContributor" version="1.1"}%
 %META:FILEATTACHMENT{name="tag_remove.gif" attr="h" comment="Button: remove tag" date="1141697484" path="tag_remove.gif" size="862" user="ProjectContributor" version="1.1"}%
 %META:FILEATTACHMENT{name="alltagcloud.gif" attr="h" comment="Screenshot of view all tags tag cloud" date="1141693726" path="alltagcloud.gif" size="8087" user="ProjectContributor" version="1.1"}%
