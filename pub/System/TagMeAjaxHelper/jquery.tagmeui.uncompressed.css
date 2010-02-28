@@ -1,13 +1,13 @@
-#tagmeTagCloud {
+#tagmejqTagCloud {
   padding-top: 1em;
 }
-#tagmejqtagstatus, #tagmejqtag {
-  float: left;
+.jqTextboxListContainer {
+  display: inline;
 }
-#tagmejqtag {
+#tagmejqtagbutton {
 	text-decoration: underline;
 }
-#tagmejqtag:hover {
+#tagmejqtagbutton:hover {
   color: #C0FFC0; 
 	background-color: #778899;
 	cursor: pointer;
@@ -22,7 +22,7 @@
 #tagmejqtag.spinning {
   background-image: url('cloudspinner.gif');
 }
-#tagmejqtag {
+#tagmejqtagbutton {
 	background-image: url('tag.png');
 	background-position: right;
   background-repeat: no-repeat;

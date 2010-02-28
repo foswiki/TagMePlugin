@@ -7,20 +7,22 @@
    include=".*%URLPARAM{"q"}%.*"
 }%
 %ENDSECTION{"tagquery"}%
-%STARTSECTION{"jqui"}%%JQREQUIRE{"textboxlist"}%%JQREQUIRE{"autocomplete"}%%JQREQUIRE{"simplemodal"}%%JQREQUIRE{"hoverintent"}%%JQREQUIRE{"queryobject"}%%ADDTOHEAD{
-   "TAGMEPLUGIN::JQUI"
-   text="<meta name='foswiki.TagMePlugin.jquitags'
-       content='%TAGME{tpaction="%URLPARAM{"tpaction" default="showalltags"}%"
-         tag="%URLPARAM{"tptag"}%" web="%BASEWEB%" topic="%BASETOPIC%" separator=","}%'
-     /><script type='text/javascript' src='%PUBURLPATH%/%SYSTEMWEB%/%TOPIC%/jquery.tagmeui.js'></script>
-     <link rel='stylesheet' href='%PUBURLPATH%/%SYSTEMWEB%/TagMeAjaxHelper/jquery.tagmeui.css'
-     type='text/css' media='all'/>" 
-   requires="JQUERYPLUGIN::TEXTBOXLIST, JQUERYPLUGIN::AUTOCOMPLETE, JQUERYPLUGIN::SIMPLEMODAL, JQUERYPLUGIN::HOVERINTENT, JQUERYPLUGIN::QUERYOBJECT"
-}%<div id='tagmejqcontainer'><span id="tagmejqtagstatus">&nbsp;</span>
+%STARTSECTION{"jqui"}%%JQREQUIRE{"textboxlist"}%%JQREQUIRE{"autocomplete"}%%JQREQUIRE{"simplemodal"}%%JQREQUIRE{"hoverintent"}%%JQREQUIRE{"queryobject"}%%ADDTOZONE{"head" 
+  tag="TAGMEPLUGIN::JQUI:CSS" 
+  text="<meta name='foswiki.TagMePlugin.jquitags' content='%TAGME{tpaction="%URLPARAM{"tpaction" default="showalltags"}%" tag="%URLPARAM{"tptag"}%" web="%BASEWEB%" topic="%BASETOPIC%" separator=","}%' />
+     <meta name='foswiki.TagMePlugin.remove' content='%IF{"($TAGMEPLUGIN_JQUIREMOVEALL='everybody') OR ($TAGMEPLUGIN_JQUIREMOVEALL='topicchange' AND '%BASEWEB%.%BASETOPIC%' allows 'CHANGE') OR ('%USERNAME%' ingroup 'AdminGroup')" then="all"}%' />
+     <link rel='stylesheet' href='%PUBURLPATH%/%SYSTEMWEB%/TagMeAjaxHelper/jquery.tagmeui.css' type='text/css' media='all'/>" 
+  requires="JQUERYPLUGIN::TEXTBOXLIST, JQUERYPLUGIN::AUTOCOMPLETE, JQUERYPLUGIN::SIMPLEMODAL, JQUERYPLUGIN::HOVERINTENT, JQUERYPLUGIN::QUERYOBJECT, JQUERYPLUGIN"
+}%%ADDTOZONE{"body"
+  tag="TAGMEPLUGIN::JQUI::JS" 
+  text="<script type='text/javascript' src='%PUBURLPATH%/%SYSTEMWEB%/%TOPIC%/jquery.tagmeui.js'></script>" 
+  requires="JQUERYPLUGIN::TEXTBOXLIST, JQUERYPLUGIN::AUTOCOMPLETE, JQUERYPLUGIN::SIMPLEMODAL, JQUERYPLUGIN::HOVERINTENT, JQUERYPLUGIN::QUERYOBJECT, JQUERYPLUGIN"
+}%<div id='tagmejqcontainer'>
 <div id="tagmejqcloud" style="display:none"></div>
-<span id="tagmejqtag" title="%MAKETEXT{"Click for tag cloud pop-up"}%">
+<form id="tagmejqtaglistform" name="tagmeshow" method="post" action="%SCRIPTURLPATH{"viewauth"}%/%WEB%/%TOPIC%">
+<span id="tagmejqtagstatus">&nbsp;</span>
+<span id="tagmejqtagbutton" title="%MAKETEXT{"Click for tag cloud pop-up"}%">
 %MAKETEXT{"Tags"}%&nbsp;</span>
-<form name="tagmeshow" method="post" action="%SCRIPTURLPATH{"viewauth"}%/%WEB%/%TOPIC%">
    <input type="text" name="add" id="tagmejqinputfield" title="%MAKETEXT{"Enter a tag name to apply to this topic"}%" size="15" value="%TAGME{ tpaction="showalltags" web="%BASEWEB%" topic="%BASETOPIC%"}%"/> 
 </form></div>%ENDSECTION{"jqui"}%
 
@@ -29,13 +31,14 @@
   then="%MAKETEXT{"all webs"}%"
   else="%MAKETEXT{"[[[_1].WebHome][[_1]]] web" args="%URLPARAM{"tpweb"}%"}%"
 }%
-<form id="tagmeWebSelect" method="post" action="%SCRIPTURLPATH{"view"}%/%WEB%/%TOPIC%">
-  <input type="checkbox" id="tagmeCheckboxJustThisWeb" name="tpweb"\
+<br/>
+<form id="tagmejqWebSelect" method="post" action="%SCRIPTURLPATH{"view"}%/%WEB%/%TOPIC%">
+  <input type="checkbox" id="tagmejqCheckboxJustThisWeb" name="tpweb"\
     value="%URLPARAM{"tpweb"}%" %IF{"'%URLPARAM{"tpweb"}%'=''" then="checked='checked'"}%\
 	title="%MAKETEXT{"Show tags from all webs"}%"\
   />
   <label for="tpweb">%MAKETEXT{"all webs"}%</label> |
-  <input type="checkbox" id="tagmeCheckboxJustMe" name="tpuser" value="me" \
+  <input type="checkbox" id="tagmejqCheckboxJustMe" name="tpuser" value="me" \
     %IF{"'%URLPARAM{"tpuser"}%'='me'" then="checked='checked'"}%\
 	title="%MAKETEXT{"Show tags used by me"}%"\
   />
@@ -45,7 +48,7 @@
   <a href="%SCRIPTURLPATH{"view"}%/%SYSTEMWEB%/TagMeDeleteTag"\
     title="%MAKETEXT{"Delete tags"}%">%MAKETEXT{"delete..."}%</a>
 </form>
-<div id="tagmeTagCloud" style="line-height:2em;">
+<div id="tagmejqTagCloud" style="line-height:2em;">
 %TAGME{tpaction="showalltags"
   web="%URLPARAM{"tpweb"}%"
   by="%URLPARAM{"tpuser"}%"
@@ -59,4 +62,3 @@
 <!--
    * Set NOWYSIWYG = 1
 -->
-

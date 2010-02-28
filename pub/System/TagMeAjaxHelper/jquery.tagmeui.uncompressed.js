@@ -22,253 +22,255 @@
 
 'use strict';
 jQuery(document).ready(function () {
-	(function ($) {
-		$.fn.tagmeui = function (options) {
+    (function ($) {
+        $.fn.tagmeui = function (options) {
             /* TODO: 
              * - Prevent multiple instantiations on DOM elements.
              * - There isn't much need for this.each/chaining. Re-factor to use
              *   jquery metadata plugin, and so opts can be extracted from DOM 
              *   element. Eg: $('#myTagMeDivWithMetaData').tagmeui({extra: 'opts'});
-             * - Modify TagMePlugin itself to support hard removal of tags,
-             *   instead of the bogus vote count subtraction currently 
              * - There is no meaningful feedback to user if ajax calls fail 
              *   (auth/permissions, etc) */
-			$(this).each(function () {
-				var tagmeui = new TagMeUI($(this), options);
-				
-				tagmeui.initTagField();
-			});
-			
-			return this;
-		};
-		
-		function TagMeUI(caller, options) {
-			var that = this;
-			
-			this.caller = caller;
-			this.urlQuery = $.query;
-			this.cloudQuery = this.urlQuery.copy();
-			this.cloudQuery.SET('skin', 'text');
-			this.cloudQuery.SET('contenttype', 'text/plain');
-			this.cloudQuery.SET('section', 'cloud');
-			/* Convert comma separated list of tags (from html meta) to array */
-			this.tags = foswiki.TagMePlugin.jquitags.split(',');
-			if (!this.cloudQuery.get('qcallingweb')) {
-				this.cloudQuery.SET('qcallingweb', foswiki.web);
-			}
-			this.settings = {
-				cloudSpinner: '#tagmejqtag',
-				cloudContainer: '#tagmejqcloud',
-				cloudWeb: (function () {
-					var web = that.cloudQuery.get('qcallingweb');
-					
-					if (!web) {
-						web = foswiki.web;
-					}
-					
-					if (!that.cloudQuery.get('tpweb')) {
-						that.cloudQuery.SET('tpweb', web);
-					}
-					
-					return web;
-				}()),
-				cloudGetUrl: foswiki.scriptUrlPath + '/view/' + 
-					foswiki.systemWebName + '/TagMeAjaxHelper',
-				cloudUiJustThisWeb: '#tagmeCheckboxJustThisWeb',
-				cloudUiJustMe: '#tagmeCheckboxJustMe',
-				cloudModalOpts: {
-					opacity: 7,
-					position: ['50px', null],
-					maxWidth: (document.width - 50),
-					persist: true,
-					onShow: function () {
-						$('#simplemodal-overlay').click(
+            $(this).each(function () {
+                var tagmeui = new TagMeUI($(this), options);
+                
+                tagmeui.initTagField();
+            });
+            
+            return this;
+        };
+        
+        function TagMeUI(caller, options) {
+            var that = this;
+            
+            this.caller = caller;
+            this.urlQuery = $.query;
+            this.cloudQuery = this.urlQuery.copy();
+            this.cloudQuery.SET('skin', 'text');
+            this.cloudQuery.SET('contenttype', 'text/plain');
+            this.cloudQuery.SET('section', 'cloud');
+            /* Convert comma separated list of tags (from html meta) to array */
+            this.tags = foswiki.TagMePlugin.jquitags.split(',');
+            if (!this.cloudQuery.get('qcallingweb')) {
+                this.cloudQuery.SET('qcallingweb', foswiki.web);
+            }
+            this.settings = {
+                cloudSpinner: '#tagmejqtagbutton',
+                cloudContainer: '#tagmejqcloud',
+                cloudWeb: (function () {
+                    var web = that.cloudQuery.get('qcallingweb');
+                    
+                    if (!web) {
+                        web = foswiki.web;
+                    }
+                    
+                    if (!that.cloudQuery.get('tpweb')) {
+                        that.cloudQuery.SET('tpweb', web);
+                    }
+                    
+                    return web;
+                }()),
+                cloudGetUrl: foswiki.scriptUrlPath + '/view/' + 
+                    foswiki.systemWebName + '/TagMeAjaxHelper',
+                cloudUiJustThisWeb: '#tagmejqCheckboxJustThisWeb',
+                cloudUiJustMe: '#tagmejqCheckboxJustMe',
+                cloudModalOpts: {
+                    opacity: 7,
+                    position: ['70px', null],
+                    maxWidth: (document.width - 50),
+                    persist: true,
+                    onShow: function () {
+                        $('#simplemodal-overlay').click(
 
-						function () {
-							$.modal.close();
-						});
-					}
-				},
-				taglistSpinner: '#tagmejqtagstatus',
-				taglistContainer: '#tagmejqcontainer',
-				taglistInputField: '#tagmejqinputfield',
-				tagLinkUrl: foswiki.scriptUrlPath + '/view/' + 
-					foswiki.systemWebName + '/TagMeSearch',
+                        function () {
+                            $.modal.close();
+                        });
+                    }
+                },
+                taglistSpinner: '#tagmejqtagstatus',
+                taglistContainer: '#tagmejqcontainer',
+                taglistInputField: '#tagmejqinputfield',
+                tagLinkUrl: foswiki.scriptUrlPath + '/view/' + 
+                    foswiki.systemWebName + '/TagMeSearch',
                 tagLinkTitle: 'Other topics with this tag',
-				tagPostUrl: foswiki.scriptUrlPath + '/viewauth/' + foswiki.web + 
-					'/' + foswiki.topic,
-				autocompleteUrl: foswiki.scriptUrlPath + '/view/' + 
-					foswiki.systemWebName + '/TagMeAjaxHelper',
-				autocompleteOpts: {
-					extraParams: {
-						section: 'tagquery',
-						contenttype: 'text/plain',
-						skin: 'text'
-					},
-					autoFill: true,
-					matchCase: false,
-					multiple: false,
-					max: 0,
-					mustMatch: false
-				}
-			};
-			$.extend(this.settings, options);    
-		}
-		
-		/* Check that tagName exists inList, and if not, POST the action and execute
-		** the finishHandler(tagName) */
-		TagMeUI.prototype.actOnMissingTag = function (tagName, inList, action, finishHandler) {
-			var didModify = false,
-				that = this;
+                tagPostUrl: foswiki.scriptUrlPath + '/viewauth/' + foswiki.web + 
+                    '/' + foswiki.topic,
+                autocompleteUrl: foswiki.scriptUrlPath + '/view/' + 
+                    foswiki.systemWebName + '/TagMeAjaxHelper',
+                autocompleteOpts: {
+                    extraParams: {
+                        section: 'tagquery',
+                        contenttype: 'text/plain',
+                        skin: 'text'
+                    },
+                    autoFill: true,
+                    matchCase: false,
+                    multiple: false,
+                    max: 0,
+                    mustMatch: false
+                }
+            };
+            $.extend(this.settings, options);    
+        }
+        
+        /* Check that tagName exists inList, and if not, POST the action and execute
+        ** the finishHandler(tagName) */
+        TagMeUI.prototype.actOnMissingTag = function (tagName, inList, action, finishHandler) {
+            var didModify = false,
+                that = this;
 
-			if ($.inArray(tagName, inList) === -1) {
-				$(this.settings.taglistSpinner).addClass('spinning');
-				$.post(this.settings.postUrl, {
-					tpaction: action,
-					tptag: tagName,
-					contenttype: 'text/plain',
-					skin: 'tagmejquiajax'
-				},
+            if ($.inArray(tagName, inList) === -1) {
+                $(this.settings.taglistSpinner).addClass('spinning');
+                $.post(this.settings.postUrl, {
+                    tpaction: action,
+                    tptag: tagName,
+                    contenttype: 'text/plain',
+                    skin: 'tagmejquiajax'
+                },
 
-				function (data) {
-					that.linkifyTagText(that.settings.taglistContainer);
-					$(that.settings.taglistSpinner).removeClass('spinning');
-					finishHandler(tagName);
-				});
-				didModify = true;
-			}
+                function (data) {
+                    that.linkifyTagText(that.settings.taglistContainer);
+                    $(that.settings.taglistSpinner).removeClass('spinning');
+                    finishHandler(tagName);
+                });
+                didModify = true;
+            }
 
-			return didModify;
-		};
+            return didModify;
+        };
 
-		/* By default, textboxlist doesn't handle hyperlinks in the list items.
-		** This would be much better implemented using some sort of callback, but
-		** textboxlist didn't seem to implement a suitable hook. */
-		TagMeUI.prototype.linkifyTagText = function (selector) {
-			var that = this;
-			$(selector + ' > form > div.jqTextboxListContainer > span:not(.linkified)').each(
-				function (index, tagSpan) {
-					var tagQuery = $.query.copy(),
+        /* By default, textboxlist doesn't handle hyperlinks in the list items.
+        ** This would be much better implemented using some sort of callback, but
+        ** textboxlist didn't seem to implement a suitable hook. */
+        TagMeUI.prototype.linkifyTagText = function (selector) {
+            var that = this;
+            $(selector + ' > form > div.jqTextboxListContainer > span:not(.linkified)').each(
+                function (index, tagSpan) {
+                    var tagQuery = $.query.copy(),
                         theTag = $(tagSpan).text();
-					
-					/* There must be an easier way to remove the textNode from a span; but
-					** I don't know it... yet. .text('') destroys child elements we want to
-					** keep. */
-					function removeTextNodes(element) {
-						$(element).contents().filter(
-							function () {
-								if (this.nodeType === Node.TEXT_NODE) {
-									this.textContent = '';
-								}
-							}
-						);
+                    
+                    /* There must be an easier way to remove the textNode from a span; but
+                    ** I don't know it... yet. .text('') destroys child elements we want to
+                    ** keep. */
+                    function removeTextNodes(element) {
+                        $(element).contents().filter(
+                            function () {
+                                if (this.nodeType === Node.TEXT_NODE) {
+                                    this.textContent = '';
+                                }
+                            }
+                        );
 
-						return;
-					}
+                        return;
+                    }
 
-					tagQuery.SET('tag', theTag);
-					tagQuery.SET('qcallingweb', foswiki.web);
-					removeTextNodes(tagSpan);
-					$(tagSpan).append('<a href="' + that.settings.tagLinkUrl + 
-						tagQuery.toString() + '" title="' + 
+                    tagQuery.SET('tag', theTag);
+                    tagQuery.SET('qcallingweb', foswiki.web);
+                    removeTextNodes(tagSpan);
+                    $(tagSpan).append('<a href="' + that.settings.tagLinkUrl + 
+                        tagQuery.toString() + '" title="' + 
                         that.settings.tagLinkTitle + '">' + theTag + '</a>');
-					$(tagSpan).addClass('linkified');
-				}
-			);
+                    $(tagSpan).addClass('linkified');
+                }
+            );
 
-			return;
-		};
+            return;
+        };
         
         /* Populates a hidden div with the tag cloud and then displays it 
          * with simplemodal. Some messiness to bind events on the cloud modal */
-		TagMeUI.prototype.loadCloud = function () {
-			var that = this;
-		
-			function initDialogue() {
-				function setQueryWithCheckbox(qkey, qvalue, checkbox, sense) {
-					if ($(checkbox).is(':checked') === sense) {
-						that.cloudQuery.SET(qkey, qvalue);
-					} else {
-						that.cloudQuery = that.cloudQuery.remove(qkey);
-					}
-				}
-				
+        TagMeUI.prototype.loadCloud = function () {
+            var that = this;
+        
+            function initDialogue() {
+                function setQueryWithCheckbox(qkey, qvalue, checkbox, sense) {
+                    if ($(checkbox).is(':checked') === sense) {
+                        that.cloudQuery.SET(qkey, qvalue);
+                    } else {
+                        that.cloudQuery = that.cloudQuery.remove(qkey);
+                    }
+                }
+                
                 /* Would be nice if simplemodal had more sensible autosizing 
                  * with content. */
-				if ($('#simplemodal-container').width() > $(document).width() - 50) {
-					$('#simplemodal-container').width($(document).width() - 50);
-				}
-				$(that.settings.cloudUiJustThisWeb).click(function () {
-					setQueryWithCheckbox('tpweb', that.settings.cloudWeb, 
-						that.settings.cloudUiJustThisWeb, false);
-					that.loadCloud();
-				});
-				$(that.settings.cloudUiJustMe).click(function () {
-					setQueryWithCheckbox('tpuser', 'me', 
-						that.settings.cloudUiJustMe, true);
-					that.loadCloud();
-				});
-			}
+                if ($('#simplemodal-container').width() > $(document).width() - 50) {
+                    $('#simplemodal-container').width($(document).width() - 50);
+                }
+                $(that.settings.cloudUiJustThisWeb).click(function () {
+                    setQueryWithCheckbox('tpweb', that.settings.cloudWeb, 
+                        that.settings.cloudUiJustThisWeb, false);
+                    that.loadCloud();
+                });
+                $(that.settings.cloudUiJustMe).click(function () {
+                    setQueryWithCheckbox('tpuser', 'me', 
+                        that.settings.cloudUiJustMe, true);
+                    that.loadCloud();
+                });
+            }
 
-			$(this.settings.cloudSpinner).addClass('spinning');
-			$(this.settings.cloudContainer).load(this.settings.cloudGetUrl + 
-				this.cloudQuery.toString(), function () {
-				$(that.settings.cloudSpinner).removeClass('spinning');
-				$(that.settings.cloudContainer).modal(that.settings.cloudModalOpts);
-				initDialogue();
-			});
-		};
+            $(this.settings.cloudSpinner).addClass('spinning');
+            $(this.settings.cloudContainer).load(this.settings.cloudGetUrl + 
+                this.cloudQuery.toString(), function () {
+                $(that.settings.cloudSpinner).removeClass('spinning');
+                $(that.settings.cloudContainer).modal(that.settings.cloudModalOpts);
+                initDialogue();
+            });
+        };
 
-		TagMeUI.prototype.initTagField = function () {
-			/* MD's textboxlist jq plugin allows the user to easily work on tags */
-			var that = this;
-			
-			$(this.settings.taglistInputField).textboxlist({
-				onSelect: function (input) {
-					/* The logic here is a bit odd, started out anticipating a batch rather than
-					** one-by-one POST to updated a modified selection of tags... */
-					var selectedTags = input.currentValues, 
-						didAdd = false;
+        TagMeUI.prototype.initTagField = function () {
+            /* MD's textboxlist jq plugin allows the user to easily work on tags */
+            var that = this;
+            
+            $(this.settings.taglistInputField).textboxlist({
+                onSelect: function (input) {
+                    /* The logic here is a bit odd, started out anticipating a batch rather than
+                    ** one-by-one POST to updated a modified selection of tags... */
+                    var selectedTags = input.currentValues, 
+                        didAdd = false;
 
-					/* If there's a selected tag that isn't in the list of stored tags,
-					** it needs to be added. */
-					$.each(selectedTags, function (index, tagName) {
-						if (that.actOnMissingTag(tagName, that.tags, 'add', 
-							function (tagName) {
-								that.tags.push(tagName);
-							})
-						) {
-							didAdd = true;
-						}
-					});
+                    /* If there's a selected tag that isn't in the list of stored tags,
+                    ** it needs to be added. */
+                    $.each(selectedTags, function (index, tagName) {
+                        if (that.actOnMissingTag(tagName, that.tags, 'newtagsandadd', 
+                            function (tagName) {
+                                that.tags.push(tagName);
+                            })
+                        ) {
+                            didAdd = true;
+                        }
+                    });
 
-					if (!didAdd) {
-						/* If there's a stored tag that isn't in the list of selected tags, 
-						** it needs to be removed. */
-						$.each(that.tags, function (index, tagName) {
-							if (!that.actOnMissingTag(tagName, selectedTags, 'remove', 
-								function (tagName) {
-									that.tags.pop(tagName);
-								})
-							) {
-								that.linkifyTagText(that.settings.taglistContainer);
-							}
-						});
-					}
-				},
+                    if (!didAdd) {
+                        /* If there's a stored tag that isn't in the list of selected tags, 
+                        ** it needs to be removed. */
+                        $.each(that.tags, function (index, tagName) {
+                            var removeAction = 'remove';
+                            if ( (typeof(foswiki.TagMePlugin) !== 'undefined') && (foswiki.TagMePlugin.remove === 'all') ) {
+                                removeAction = 'removeall';
+                            }
+                            if (!that.actOnMissingTag(tagName, selectedTags, removeAction, 
+                                function (tagName) {
+                                    that.tags.pop(tagName);
+                                })
+                            ) {
+                                that.linkifyTagText(that.settings.taglistContainer);
+                            }
+                        });
+                    }
+                    
+                },
 
-				autocomplete: this.settings.autocompleteUrl,
-				autocompleteOpts: this.settings.autocompleteOpts
-			});
-			
-			this.linkifyTagText(this.settings.taglistContainer);
+                autocomplete: this.settings.autocompleteUrl,
+                autocompleteOpts: this.settings.autocompleteOpts
+            });
+            this.linkifyTagText(this.settings.taglistContainer);
 
-			$(this.settings.cloudSpinner).click(function () {
-				that.loadCloud();
-			});
-		};
-		
-	}(jQuery));
+            $(this.settings.cloudSpinner).click(function () {
+                that.loadCloud();
+            });
+        };
+        
+    }(jQuery));
     
     /* Install tagmeui using default options */
     $.fn.tagmeui();

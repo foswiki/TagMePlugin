@@ -64,8 +64,8 @@ An experimental interactive user interface is also provided, implemented using t
 
 All features work without having to re-load the topic:
    * Auto-complete tag names. Saves newly selected tags immediately
-   * If auto-complete fails to match the entered tag and the user submits
-     it, the tag is immediately created and applied
+   * The entered tag is created and added even if the tag did not
+     previously exist.
    * Access tag cloud in a modal dialogue at the click of a button. Check-box
      toggles are applied immediately (show cloud for just this web/all webs,
      just my tags/all tags)
@@ -73,11 +73,23 @@ All features work without having to re-load the topic:
      the TagMeSearch topic, where the tag cloud will still be generated
      from the originating web (avoids reliance on browser back button
      when exploring a web via tag cloud)
+   * Removing a tag may optionally clear the tag from the current topic
+     regardless of vote count (default for members of Main.AdminGroup). 
+      * =Set TAGMEPLUGIN_JQUIREMOVEALL &#61; everybody= <br/>
+        will allow any logged-in user to remove a tag, or
+      * =Set TAGMEPLUGIN_JQUIREMOVEALL &#61; topicchange= <br/>to only give this
+        ability to those users who have CHANGE permission on the current
+        topic (everbody else will still be able to vote down tags as
+        usual)<br/>
+      * %ICON{"warning"}%
+        jqui uses an undocumented feature of TagMePlugin to access the
+        removeall feature, which does not appear to follow any access
+        controls internally.
 
 Include it into your WebTopBar (See WebTopBarExample) or any part of your skin that has horizontal space to spare, as follows:
 <verbatim class="tml">%INCLUDE{"%SYSTEMWEB%.TagMeAjaxHelper" section="jqui"}%</verbatim>
 
-<div class="foswikiImage"><img src="%ATTACHURLPATH%/jquery.tagmeui.png" alt="Screenshot of experimental jQuery UI"  width="522" height="156" /></div>
+<div class="foswikiImage"><img src="%ATTACHURLPATH%/jquery.tagmeui.png" alt="Screenshot of experimental jQuery UI"  width="493" height="205" /></div>
 
 Dependencies:
    * JQueryPlugin
@@ -198,7 +210,7 @@ The Plugin handles a =%<nop>TAGME{}%= variable that performs different actions. 
 	  | =tag="..."= | Name of tag | (required) |
 	  | =nostatus="on"= | Turn off status text shown when a tag is added or voted on | (show status text) |
 
-	* =%<nop>TAGME{ tpaction="newtagandadd" ... }%= - create new tag and add tag to topic
+	* =%<nop>TAGME{ tpaction="newtagsandadd" ... }%= - create new tag and add tag to topic
 	  | *Parameter* | *Comment* | *Default* |
 	  | =tag="..."= | Name of tag. Accepts alphanumeric and underscore characters only (unless =NORMALIZE_TAG_INPUT= is set to 0 to allow any user input) | (required) |
 
@@ -373,7 +385,7 @@ topic. Use the standard preference setting topics, such as
 |  Version: | %$VERSION% |
 |  Release: | %$RELEASE% |
 |  Change History: | <!-- versions below in reverse order -->&nbsp; |
-|  31 Jan 2010: | Foswiki:Main.PaulHarvey: Added an interactive user interface implemented with JQuery |
+|  31 Jan 2010: | Foswiki:Main.PaulHarvey: Added an interactive user interface implemented with JQuery; ship missing blog style tmpl files; fix docs/implementation of newtagsandadd |
 |  11 Jun 2009: | Foswiki port, and moved settings out of this topic |
 |  30 Aug 2008: | Foswiki:Main.ColasNahaboo: enhancements to the "blog" style: Bundles, count of known tags, option to delete tags |
 |  28 Aug 2008: | Foswiki:Main.ColasNahaboo: prefix & suffix options renamed as header & footer. New parameter style to TAGME to be able to define different UI style for the default "show" action of TAGME. Implemented a first one, "blog" for the simpler case of authors managing the same tags |
@@ -413,7 +425,7 @@ topic. Use the standard preference setting topics, such as
 
 __Related Topics:__ %SYSTEMWEB%.TagMeViewAllTags, %SYSTEMWEB%.TagMeViewMyTags, %SYSTEMWEB%.TagMeSearch, %SYSTEMWEB%.TagMeDebugViewTags, %SYSTEMWEB%.TagMeDebugSearch, %SYSTEMWEB%.TagMeAjaxHelper, [[%SYSTEMWEB%.Plugins][Plugins]], %SYSTEMWEB%.DeveloperDocumentationCategory, %SYSTEMWEB%.AdminDocumentationCategory, %SYSTEMWEB%.DefaultPreferences, %USERSWEB%.SitePreferences
 
-%META:FILEATTACHMENT{name="jquery.tagmeui.png" attr="h" comment="Screenshot of experimental jQuery UI" date="1264982400" path="jquery.tagmeui.png" size="16289" user="ProjectContributor" version="1.1"}%
+%META:FILEATTACHMENT{name="jquery.tagmeui.png" attr="h" comment="Screenshot of experimental jQuery UI" date="1264982400" path="jquery.tagmeui.png" size="27644" user="ProjectContributor" version="1.1"}%
 %META:FILEATTACHMENT{name="tag_add.gif" attr="h" comment="Button: add tag" date="1141691885" path="tag_add.gif" size="857" user="ProjectContributor" version="1.1"}%
 %META:FILEATTACHMENT{name="tag_remove.gif" attr="h" comment="Button: remove tag" date="1141697484" path="tag_remove.gif" size="862" user="ProjectContributor" version="1.1"}%
 %META:FILEATTACHMENT{name="alltagcloud.gif" attr="h" comment="Screenshot of view all tags tag cloud" date="1141693726" path="alltagcloud.gif" size="8087" user="ProjectContributor" version="1.1"}%

@@ -35,7 +35,7 @@ use vars qw(
 );
 
 our $VERSION           = '$Rev$';
-our $RELEASE           = '01 Feb 2010';
+our $RELEASE           = '28 Feb 2010';
 our $NO_PREFS_IN_TOPIC = 1;
 our $SHORTDESCRIPTION =
   'Tag wiki content collectively to find content by keywords';
@@ -1183,7 +1183,7 @@ sub _newTagsAndAdd {
     foreach my $tag ( split( ' ', $tags ) ) {
         $tag = _makeSafeTag($tag);
         if ($tag) {
-            $args = 'tag="' . $tag . '"';
+            $args = {tag => $tag};
             $text = _newTag($args);
             $text = _addTag($args) unless $text =~ /foswikiAlert/;
         }
