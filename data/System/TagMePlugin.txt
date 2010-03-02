@@ -251,9 +251,10 @@ The short summary is:
    * Copy the CSS styles for =tagmetags= (see below at [[%TOPIC%#ExampleStyle][Example styles]]) into the file
    * Attach the file to [[%USERSWEB%.SitePreferences]]
    * In [[%USERSWEB%.SitePreferences]], write: 
-   <verbatim>
-   * Set USERSTYLEURL = %PUBURL%/%MAINWEB%/SitePreferences/sitestyle.css
-   </verbatim>
+
+<pre>
+   * Set USER<nop>STYLEURL = %PUBURL%/%MAINWEB%/SitePreferences/sitestyle.css
+</pre>
 
 ---+++ Other places for the tag interface
 To show the tags in the top bar, edit [[%SYSTEMWEB%.WebTopBar]] and copy:
