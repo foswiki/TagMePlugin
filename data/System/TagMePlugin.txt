@@ -385,7 +385,8 @@ topic. Use the standard preference setting topics, such as
 |  Version: | %$VERSION% |
 |  Release: | %$RELEASE% |
 |  Change History: | <!-- versions below in reverse order -->&nbsp; |
-|  31 Jan 2010: | Foswiki:Main.PaulHarvey: Added an interactive user interface implemented with JQuery; ship missing blog style tmpl files; fix docs/implementation of newtagsandadd |
+|  02 Mar 2010: | Foswiki:Main.PaulHarvey: Fix IE compatibility, link tag items to TagMeSearch topic with web parameter |
+|  01 Mar 2010: | Foswiki:Main.PaulHarvey: Added an interactive user interface implemented with JQuery; ship missing blog style tmpl files; fix docs/implementation of newtagsandadd |
 |  11 Jun 2009: | Foswiki port, and moved settings out of this topic |
 |  30 Aug 2008: | Foswiki:Main.ColasNahaboo: enhancements to the "blog" style: Bundles, count of known tags, option to delete tags |
 |  28 Aug 2008: | Foswiki:Main.ColasNahaboo: prefix & suffix options renamed as header & footer. New parameter style to TAGME to be able to define different UI style for the default "show" action of TAGME. Implemented a first one, "blog" for the simpler case of authors managing the same tags |

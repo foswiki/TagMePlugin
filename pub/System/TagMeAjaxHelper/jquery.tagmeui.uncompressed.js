@@ -153,19 +153,17 @@ jQuery(document).ready(function () {
                     ** I don't know it... yet. .text('') destroys child elements we want to
                     ** keep. */
                     function removeTextNodes(element) {
-                        $(element).contents().filter(
-                            function () {
-                                if (this.nodeType === Node.TEXT_NODE) {
-                                    this.textContent = '';
-                                }
-                            }
-                        );
+                        if ( (typeof(element.lastChild) === 'object') && 
+                            (element.lastChild !== null) ) {
+                            element.lastChild.data = '';
+                        }
 
                         return;
                     }
 
                     tagQuery.SET('tag', theTag);
                     tagQuery.SET('qcallingweb', foswiki.web);
+                    tagQuery.SET('web', foswiki.web);
                     removeTextNodes(tagSpan);
                     $(tagSpan).append('<a href="' + that.settings.tagLinkUrl + 
                         tagQuery.toString() + '" title="' + 

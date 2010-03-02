@@ -52,7 +52,7 @@
 %TAGME{tpaction="showalltags"
   web="%URLPARAM{"tpweb"}%"
   by="%URLPARAM{"tpuser"}%"
-  format="<a href='%SCRIPTURLPATH{"view"}%/%SYSTEMWEB%/TagMeSearch?tag=$tag;by=%URLPARAM{ "tpuser" }%;qcallingweb=%URLPARAM{"qcallingweb"}%' style='font-size:$size%' title='%MAKETEXT{"Other topics with this tag"}%'>$tag</a>"
+  format="<a href='%SCRIPTURLPATH{"view"}%/%SYSTEMWEB%/TagMeSearch?tag=$tag;by=%URLPARAM{ "tpuser" }%;qcallingweb=%URLPARAM{"qcallingweb"}%;web=%URLPARAM{"tpweb"}%' style='font-size:$size%' title='%MAKETEXT{"Other topics with this tag"}%'>$tag</a>"
   separator=" "
   minsize="94"
   maxsize="220"
