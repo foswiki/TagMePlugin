@@ -253,7 +253,7 @@ The short summary is:
    * In [[%USERSWEB%.SitePreferences]], write: 
 
 <pre>
-   * Set USER<nop>STYLEURL = %PUBURL%/%MAINWEB%/SitePreferences/sitestyle.css
+   * Set USER<nop>STYLEURL = %<nop>PUBURL%/%<nop>MAINWEB%/SitePreferences/sitestyle.css
 </pre>
 
 ---+++ Other places for the tag interface
