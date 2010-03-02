@@ -163,7 +163,7 @@ jQuery(document).ready(function () {
 
                     tagQuery.SET('tag', theTag);
                     tagQuery.SET('qcallingweb', foswiki.web);
-                    tagQuery.SET('web', foswiki.web);
+                    tagQuery.SET('qweb', foswiki.web);
                     removeTextNodes(tagSpan);
                     $(tagSpan).append('<a href="' + that.settings.tagLinkUrl + 
                         tagQuery.toString() + '" title="' + 
