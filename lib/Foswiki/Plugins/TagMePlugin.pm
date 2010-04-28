@@ -678,6 +678,11 @@ sub _showAllTags {
         }
 
         foreach $webTopic ( _getTagInfoList() ) {
+            # SMELL: Dumb fix to dumb code, Item4627: Subwebs are assumed
+            # to be separated with . instead of /
+            if ( $qWeb ) {
+                $qWeb =~ s!/!.!g;
+            }
             next if ( $qWeb        && $webTopic !~ /^$qWeb\./ );
             next if ( $topicsRegex && $webTopic !~ /$topicsRegex/ );
             my @tagInfo = _readTagInfo($webTopic);
@@ -823,6 +828,11 @@ sub _queryTag {
     my $webTopic = '';
 
     foreach $webTopic ( _getTagInfoList() ) {
+        # SMELL: Dumb fix to dumb code, Item4627: Subwebs are assumed
+        # to be separated with . instead of /
+        if ( $qWeb ) {
+            $qWeb =~ s!/!.!g;
+        }
         next if ( $qWeb        && $webTopic !~ /^$qWeb\./ );
         next if ( $topicsRegex && $webTopic !~ /$topicsRegex/ );
         my @tagInfo = _readTagInfo($webTopic);
