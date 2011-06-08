@@ -13,7 +13,7 @@
      <meta name='foswiki.TagMePlugin.remove' content='%IF{"($TAGMEPLUGIN_JQUIREMOVEALL='everybody') OR ($TAGMEPLUGIN_JQUIREMOVEALL='topicchange' AND '%BASEWEB%.%BASETOPIC%' allows 'CHANGE') OR ('%USERNAME%' ingroup 'AdminGroup')" then="all"}%' />
      <link rel='stylesheet' href='%PUBURLPATH%/%SYSTEMWEB%/TagMeAjaxHelper/jquery.tagmeui.css' type='text/css' media='all'/>" 
   requires="JQUERYPLUGIN::TEXTBOXLIST, JQUERYPLUGIN::AUTOCOMPLETE, JQUERYPLUGIN::SIMPLEMODAL, JQUERYPLUGIN::HOVERINTENT, JQUERYPLUGIN::QUERYOBJECT, JQUERYPLUGIN"
-}%%ADDTOZONE{"body"
+}%%ADDTOZONE{"script"
   tag="TAGMEPLUGIN::JQUI::JS" 
   text="<script type='text/javascript' src='%PUBURLPATH%/%SYSTEMWEB%/%TOPIC%/jquery.tagmeui.js'></script>" 
   requires="JQUERYPLUGIN::TEXTBOXLIST, JQUERYPLUGIN::AUTOCOMPLETE, JQUERYPLUGIN::SIMPLEMODAL, JQUERYPLUGIN::HOVERINTENT, JQUERYPLUGIN::QUERYOBJECT, JQUERYPLUGIN"
