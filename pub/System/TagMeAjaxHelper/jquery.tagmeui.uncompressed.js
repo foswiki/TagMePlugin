@@ -29,19 +29,22 @@ jQuery(document).ready(function () {
              * - There isn't much need for this.each/chaining. Re-factor to use
              *   jquery metadata plugin, and so opts can be extracted from DOM 
              *   element. Eg: $('#myTagMeDivWithMetaData').tagmeui({extra: 'opts'});
+	     *   - 2011-06-08: removed the each stuff anyway, jquery-1.3'ism
              * - There is no meaningful feedback to user if ajax calls fail 
              *   (auth/permissions, etc) */
-            $(this).each(function () {
-                var tagmeui = new TagMeUI($(this), options);
-                
-                tagmeui.initTagField();
-            });
+	    var tagmeui = new TagMeUI($(this), options);
+	    
+	    tagmeui.initTagField();
             
             return this;
         };
         
         function TagMeUI(caller, options) {
-            var that = this;
+            var that = this,
+                pageTopic = foswiki.getPreference('TOPIC'),
+                pageWeb = foswiki.getPreference('WEB'),
+                pageSystemWeb = foswiki.getPreference('SYSTEMWEB'),
+                pageScriptUrlPath = foswiki.getPreference('SCRIPTURLPATH');
             
             this.caller = caller;
             this.urlQuery = $.query;
@@ -50,9 +53,9 @@ jQuery(document).ready(function () {
             this.cloudQuery.SET('contenttype', 'text/plain');
             this.cloudQuery.SET('section', 'cloud');
             /* Convert comma separated list of tags (from html meta) to array */
-            this.tags = foswiki.TagMePlugin.jquitags.split(',');
+            this.tags = foswiki.getPreference('TagMePlugin.jquitags').split(',');
             if (!this.cloudQuery.get('qcallingweb')) {
-                this.cloudQuery.SET('qcallingweb', foswiki.web);
+                this.cloudQuery.SET('qcallingweb', pageWeb);
             }
             this.settings = {
                 cloudSpinner: '#tagmejqtagbutton',
@@ -61,7 +64,7 @@ jQuery(document).ready(function () {
                     var web = that.cloudQuery.get('qcallingweb');
                     
                     if (!web) {
-                        web = foswiki.web;
+                        web = pageWeb;
                     }
                     
                     if (!that.cloudQuery.get('tpweb')) {
@@ -70,8 +73,8 @@ jQuery(document).ready(function () {
                     
                     return web;
                 }()),
-                cloudGetUrl: foswiki.scriptUrlPath + '/view/' + 
-                    foswiki.systemWebName + '/TagMeAjaxHelper',
+                cloudGetUrl: pageScriptUrlPath + '/view/' + 
+                    pageSystemWeb + '/TagMeAjaxHelper',
                 cloudUiJustThisWeb: '#tagmejqCheckboxJustThisWeb',
                 cloudUiJustMe: '#tagmejqCheckboxJustMe',
                 cloudModalOpts: {
@@ -90,13 +93,13 @@ jQuery(document).ready(function () {
                 taglistSpinner: '#tagmejqtagstatus',
                 taglistContainer: '#tagmejqcontainer',
                 taglistInputField: '#tagmejqinputfield',
-                tagLinkUrl: foswiki.scriptUrlPath + '/view/' + 
-                    foswiki.systemWebName + '/TagMeSearch',
+                tagLinkUrl: pageScriptUrlPath + '/view/' + 
+                    pageSystemWeb + '/TagMeSearch',
                 tagLinkTitle: 'Other topics with this tag',
-                tagPostUrl: foswiki.scriptUrlPath + '/viewauth/' + foswiki.web + 
-                    '/' + foswiki.topic,
-                autocompleteUrl: foswiki.scriptUrlPath + '/view/' + 
-                    foswiki.systemWebName + '/TagMeAjaxHelper',
+                tagPostUrl: pageScriptUrlPath + '/viewauth/' + pageWeb + 
+                    '/' + pageTopic,
+                autocompleteUrl: pageScriptUrlPath + '/view/' + 
+                    pageSystemWeb + '/TagMeAjaxHelper?section=tagquery&contenttype=text/plain&skin=text',
                 autocompleteOpts: {
                     extraParams: {
                         section: 'tagquery',
@@ -124,6 +127,8 @@ jQuery(document).ready(function () {
                 $.post(this.settings.postUrl, {
                     tpaction: action,
                     tptag: tagName,
+                    qWeb: foswiki.getPreference('WEB'),
+                    qTopic: foswiki.getPreference('TOPIC'),
                     contenttype: 'text/plain',
                     skin: 'tagmejquiajax'
                 },
@@ -147,7 +152,8 @@ jQuery(document).ready(function () {
             $(selector + ' > form > div.jqTextboxListContainer > span:not(.linkified)').each(
                 function (index, tagSpan) {
                     var tagQuery = $.query.copy(),
-                        theTag = $(tagSpan).text();
+                        theTag = $(tagSpan).text(),
+                        pageWeb = foswiki.getPreference('WEB');
                     
                     /* There must be an easier way to remove the textNode from a span; but
                     ** I don't know it... yet. .text('') destroys child elements we want to
@@ -162,8 +168,8 @@ jQuery(document).ready(function () {
                     }
 
                     tagQuery.SET('tag', theTag);
-                    tagQuery.SET('qcallingweb', foswiki.web);
-                    tagQuery.SET('qweb', foswiki.web);
+                    tagQuery.SET('qcallingweb', pageWeb);
+                    tagQuery.SET('qweb', pageWeb);
                     removeTextNodes(tagSpan);
                     $(tagSpan).append('<a href="' + that.settings.tagLinkUrl + 
                         tagQuery.toString() + '" title="' + 
@@ -242,9 +248,12 @@ jQuery(document).ready(function () {
                         /* If there's a stored tag that isn't in the list of selected tags, 
                         ** it needs to be removed. */
                         $.each(that.tags, function (index, tagName) {
-                            var removeAction = 'remove';
-                            if ( (typeof(foswiki.TagMePlugin) !== 'undefined') && (foswiki.TagMePlugin.remove === 'all') ) {
+                            var removeAction = foswiki.getPreference('TagMePlugin.remove');
+
+                            if ( (typeof(removeAction) !== 'undefined') && (removeAction === 'all') ) {
                                 removeAction = 'removeall';
+                            } else {
+                                removeAction = 'remove';
                             }
                             if (!that.actOnMissingTag(tagName, selectedTags, removeAction, 
                                 function (tagName) {
@@ -256,6 +265,45 @@ jQuery(document).ready(function () {
                         });
                     }
                     
+                },
+                onDeselect: function (input) {
+                    /* The logic here is a bit odd, started out anticipating a batch rather than
+                    ** one-by-one POST to updated a modified selection of tags... */
+                    var selectedTags = input.currentValues, 
+                        didAdd = false;
+
+                    /* If there's a selected tag that isn't in the list of stored tags,
+                    ** it needs to be added. */
+                    $.each(selectedTags, function (index, tagName) {
+                        if (that.actOnMissingTag(tagName, that.tags, 'newtagsandadd', 
+                            function (tagName) {
+                                that.tags.push(tagName);
+                            })
+                        ) {
+                            didAdd = true;
+                        }
+                    });
+
+                    if (!didAdd) {
+                        /* If there's a stored tag that isn't in the list of selected tags, 
+                        ** it needs to be removed. */
+                        $.each(that.tags, function (index, tagName) {
+                            var removeAction = foswiki.getPreference('TagMePlugin.remove');
+
+                            if ( (typeof(removeAction) !== 'undefined') && (removeAction === 'all') ) {
+                                removeAction = 'removeall';
+                            } else {
+                                removeAction = 'remove';
+                            }
+                            if (!that.actOnMissingTag(tagName, selectedTags, removeAction, 
+                                function (tagName) {
+                                    that.tags.pop(tagName);
+                                })
+                            ) {
+                                that.linkifyTagText(that.settings.taglistContainer);
+                            }
+                        });
+                    }
                 },
 
                 autocomplete: this.settings.autocompleteUrl,

@@ -24,7 +24,14 @@
 <span id="tagmejqtagbutton" title="%MAKETEXT{"Click for tag cloud pop-up"}%">
 %MAKETEXT{"Tags"}%&nbsp;</span>
    <input type="text" name="add" id="tagmejqinputfield" title="%MAKETEXT{"Enter a tag name to apply to this topic"}%" size="15" value="%TAGME{ tpaction="showalltags" web="%BASEWEB%" topic="%BASETOPIC%"}%"/> 
-</form></div>%ENDSECTION{"jqui"}%
+</form></div>%ENDSECTION{"jqui"}%%STARTSECTION{"ajax"}%%TAGME{
+  tpaction="%URLPARAM{"tpaction"}%"
+  tag="%URLPARAM{"tptag"}%"
+  web="%URLPARAM{"qWeb"}%"
+  topic="%URLPARAM{"qTopic"}%"
+  nostatus="on"
+  style="nojavascript"
+}%%ENDSECTION{"ajax"}%
 
 %STARTSECTION{"cloud"}%
 ---+++ %MAKETEXT{"Tag Cloud for"}% %IF{"'%URLPARAM{"tpweb"}%'=''" 
