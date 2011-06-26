@@ -2,7 +2,7 @@
 #
 # Copyright (C) 2006 Peter Thoeny, peter@thoeny.org
 # Copyright (c) 2006 Fred Morris, m3047-twiki@inwa.net
-# Copyright (c) 2007 Sven Dowideit, SvenDowideit@DistributedINFORMATION.com
+# Copyright (c) 2007-2011 Sven Dowideit, SvenDowideit@fosiki.com
 # Copyright (c) 2007 Arthur Clemens, arthur@visiblearea.com
 # Copyright (c) 2007-2009 Crawford Currie, http://c-dot.co.uk
 #
@@ -70,6 +70,14 @@ sub initPlugin {
     $doneHeader  = 0;
 
     Foswiki::Func::registerTagHandler( 'TAGME', \&_TAGME );
+    
+  # SMELL this is not reliable as it depends on plugin order
+  # if (Foswiki::Func::getContext()->{SolrPluginEnabled}) {
+  if (($Foswiki::cfg{Plugins}{TagMePlugin}{SolrPluginIndex}) and ($Foswiki::cfg{Plugins}{SolrPlugin}{Enabled})) {
+    require Foswiki::Plugins::SolrPlugin;
+    Foswiki::Plugins::SolrPlugin::registerIndexTopicHandler(\&indexTopicHandler);
+    Foswiki::Plugins::SolrPlugin::registerIndexAttachmentHandler(\&indexAttachmentHandler);
+  }
 
     return 1;
 }
@@ -1737,5 +1745,34 @@ sub _writeLog {
             'info', 'tagme', "$web.$topic", @_ );
     }
 }
+
+
+###############################################################################
+#SolrPlugin specific indexers
+sub indexAttachmentHandler {
+  my ($indexer, $doc, $web, $topic, $attachment) = @_;
+
+}
+
+###############################################################################
+sub indexTopicHandler {
+  my ($indexer, $doc, $web, $topic, $meta, $text) = @_;
+
+    my $webTopic = "$web.$topic";
+    my @tagInfo = _readTagInfo($webTopic);
+    my @tags;
+    map {
+            if (/$lineRegex/) {
+                my $num   = $1;
+                my $tag   = $2;
+                my $users = $3;
+                #TODO: consider adding the tag once per user so it aligns with the counts TagMe
+                $doc->add_fields(tag=>$tag);
+                push(@tags, $tag);
+            }
+        } @tagInfo;
+    #print STDERR "TagMePlugin -> SolrPlugin: $web.topic: ".join(',', @tags)."\n";
+}
+
 
 1;

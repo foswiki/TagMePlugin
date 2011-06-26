@@ -381,11 +381,12 @@ topic. Use the standard preference setting topics, such as
 ---++ Plugin Info
 
 |  Plugin Author: | Peter Thoeny, Arthur Clemens |
-|  Copyright: | &copy; 2006-2007, Peter Thoeny |
+|  Copyright: | &copy; 2006-2011, Foswiki Contributors, &copy; 2006-2007, Peter Thoeny |
 |  License: | GPL ([[http://www.gnu.org/copyleft/gpl.html][GNU General Public License]]) |
 |  Version: | %$VERSION% |
 |  Release: | %$RELEASE% |
 |  Change History: | <!-- versions below in reverse order -->&nbsp; |
+|  26 Jun 2011: | Foswiki.Main.SvenDowideit: add Foswiki:Main.SolrPlugin indexing and facet support to TagMePlugin |
 |  08 Jun 2011: | Foswiki:Main.PaulHarvey: Minimal fix to experimental jqui to work with jQuery > 1.3 |
 |  02 Mar 2010: | Foswiki:Main.PaulHarvey: Fix IE compatibility, link tag items to TagMeSearch topic with web parameter |
 |  01 Mar 2010: | Foswiki:Main.PaulHarvey: Added an interactive user interface implemented with JQuery; ship missing blog style tmpl files; fix docs/implementation of newtagsandadd |
