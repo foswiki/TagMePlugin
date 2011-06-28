@@ -374,6 +374,11 @@ topic. Use the standard preference setting topics, such as
 | =TAGMEPLUGIN_ALLOW_TAG_CHANGE= | List of users and groups that are allowed to change (rename and delete) tags (names separated by commas). %BR%	Users that are not allowed to change post their change requests to TagMeChangeRequests. %BR%	If not set anyone can change tags. | Main.AdminGroup |
 | =Set TAGMEPLUGIN_BUNDLES= | Bundles are groups of tags that are presented as menus for convenience. It is a list of space-separated (or comma-separated if your tags may contain spaces) prefixed by bundle labels terminated by colon (":"). e.g:<ol><li>* Set TAGMEPLUGIN_BUNDLES = Rating: * ** ** Todo: to_blog to_read</li><li>* Set BUNDLES = Rating:, *, **, **, Todo:, to_blog, to_read</li></ol> | |
 | =TAGMEPLUGIN_DEBUG= | Generate debug trace in foswiki debug log |
+
+---+++ Foswiki:Extensions.SolrPlugin integration.
+To index !TagMePlugin tags for use in !SolrPlugins's faceted search, your Foswiki admin needs to enable this optional feature from =configure=.
+
+This can be done from the Extensions | !TagMePlugin tab - tick the ={Plugins}{TagMePlugin}{SolrPluginIndex}= option and save.
 		
 ---++ Plugin Installation Instructions
 
@@ -394,7 +399,7 @@ topic. Use the standard preference setting topics, such as
 |  Version: | %$VERSION% |
 |  Release: | %$RELEASE% |
 |  Change History: | <!-- versions below in reverse order -->&nbsp; |
-|  26 Jun 2011: | Foswiki:Main.SvenDowideit: add a command line resthandler to allow larger scale importing of tags |
+|  29 Jun 2011: | Foswiki:Main.SvenDowideit: add a command line resthandler to allow larger scale importing of tags |
 |  26 Jun 2011: | Foswiki:Main.SvenDowideit: add Foswiki:Main.SolrPlugin indexing and facet support to TagMePlugin (Foswiki:Tasks.Item10917), fix some bugs - Foswiki:Tasks.Item4628,  |
 |  08 Jun 2011: | Foswiki:Main.PaulHarvey: Minimal fix to experimental jqui to work with jQuery > 1.3 |
 |  02 Mar 2010: | Foswiki:Main.PaulHarvey: Fix IE compatibility, link tag items to TagMeSearch topic with web parameter |
