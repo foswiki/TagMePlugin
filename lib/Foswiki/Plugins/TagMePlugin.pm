@@ -70,6 +70,7 @@ sub initPlugin {
     $doneHeader  = 0;
 
     Foswiki::Func::registerTagHandler( 'TAGME', \&_TAGME );
+    Foswiki::Func::registerRESTHandler( 'addTag', \&addTag );
     
   # SMELL this is not reliable as it depends on plugin order
   # if (Foswiki::Func::getContext()->{SolrPluginEnabled}) {
@@ -111,6 +112,33 @@ sub _initialize {
     _addHeader();
 
     $initialized = 1;
+}
+
+# =========================
+# command line restHandler
+sub addTag {
+   my ( $session, $subject, $verb, $response ) = @_;
+   
+   #lets limit it to cmdline for now, I don't have the energy to work out what convoluted mech security is implemented through
+   return 'only for command line use' unless (defined(Foswiki::Func::getContext()->{command_line}));
+   
+   _initialize();
+   
+    my $query = $session->{request};
+    my $webtopic = $query->{param}->{webtopic}[0];
+    my $tag = $query->{param}->{tag}[0];   
+    my $text = '';
+
+    ($web, $topic) = Foswiki::Func::normalizeWebTopicName('', $webtopic);
+    
+    #TODO: should I test to make sure the topic exists?
+    
+    my $attr = {tag=>$tag, ignoreme=>1};
+    $text .= _newTag( $attr, 'silent', 1 );
+    $text .= _addTag($attr);
+   print STDERR "===========TagMe($web, $topic): $text\n";
+
+   return "TagMePlugin/addTag\n\n".$text;
 }
 
 # =========================

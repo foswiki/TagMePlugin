@@ -347,6 +347,14 @@ CSS styles:
 }
 </verbatim>
 
+---++ command line useage
+=./rest  /TagMePlugin/addTag tag=TEST webtopic=Main.WebHome= will add the tag =TEST= to the =Main.WebHome= topic.
+
+This allows you to do 'fun' things like adding an =Admin= tag to all topics that have =Admin= in a tml heading
+
+<verbatim>
+grep '\-\-\-+' ../data/System/*.txt | grep -s Admin | sed 's/..\/data\/System\//.\/rest \/TagMePlugin\/addTag tag=Admin webtopic=System./' | sed 's/.txt.*//' | sh
+</verbatim>
 
 #PluginSettings
 ---++ Plugin Settings
@@ -386,6 +394,7 @@ topic. Use the standard preference setting topics, such as
 |  Version: | %$VERSION% |
 |  Release: | %$RELEASE% |
 |  Change History: | <!-- versions below in reverse order -->&nbsp; |
+|  26 Jun 2011: | Foswiki:Main.SvenDowideit: add a command line resthandler to allow larger scale importing of tags |
 |  26 Jun 2011: | Foswiki:Main.SvenDowideit: add Foswiki:Main.SolrPlugin indexing and facet support to TagMePlugin (Foswiki:Tasks.Item10917), fix some bugs - Foswiki:Tasks.Item4628,  |
 |  08 Jun 2011: | Foswiki:Main.PaulHarvey: Minimal fix to experimental jqui to work with jQuery > 1.3 |
 |  02 Mar 2010: | Foswiki:Main.PaulHarvey: Fix IE compatibility, link tag items to TagMeSearch topic with web parameter |
