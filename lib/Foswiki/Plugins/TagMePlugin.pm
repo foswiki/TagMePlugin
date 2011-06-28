@@ -1786,6 +1786,8 @@ sub indexAttachmentHandler {
 sub indexTopicHandler {
   my ($indexer, $doc, $web, $topic, $meta, $text) = @_;
 
+    _initialize();
+
     my $webTopic = "$web.$topic";
     my @tagInfo = _readTagInfo($webTopic);
     my @tags;

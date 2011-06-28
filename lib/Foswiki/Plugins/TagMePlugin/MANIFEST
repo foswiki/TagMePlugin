@@ -10,6 +10,7 @@ data/System/TagMeSearch.txt 0644
 data/System/TagMeViewAllTags.txt 0644
 data/System/TagMeViewMyTags.txt 0644
 lib/Foswiki/Plugins/TagMePlugin.pm 0644
+lib/Foswiki/Plugins/TagMePlugin/Config.spec 0644
 pub/System/TagMeAjaxHelper/Makefile 0644
 pub/System/TagMeAjaxHelper/cloudspinner.gif 0644 From http://www.ajaxload.info
 pub/System/TagMeAjaxHelper/jquery.tagmeui.uncompressed.css 0644
