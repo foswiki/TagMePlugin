@@ -71,14 +71,18 @@ sub initPlugin {
 
     Foswiki::Func::registerTagHandler( 'TAGME', \&_TAGME );
     Foswiki::Func::registerRESTHandler( 'addTag', \&addTag );
-    
-  # SMELL this is not reliable as it depends on plugin order
-  # if (Foswiki::Func::getContext()->{SolrPluginEnabled}) {
-  if (($Foswiki::cfg{Plugins}{TagMePlugin}{SolrPluginIndex}) and ($Foswiki::cfg{Plugins}{SolrPlugin}{Enabled})) {
-    require Foswiki::Plugins::SolrPlugin;
-    Foswiki::Plugins::SolrPlugin::registerIndexTopicHandler(\&indexTopicHandler);
-    Foswiki::Plugins::SolrPlugin::registerIndexAttachmentHandler(\&indexAttachmentHandler);
-  }
+
+    # SMELL this is not reliable as it depends on plugin order
+    # if (Foswiki::Func::getContext()->{SolrPluginEnabled}) {
+    if (    ( $Foswiki::cfg{Plugins}{TagMePlugin}{SolrPluginIndex} )
+        and ( $Foswiki::cfg{Plugins}{SolrPlugin}{Enabled} ) )
+    {
+        require Foswiki::Plugins::SolrPlugin;
+        Foswiki::Plugins::SolrPlugin::registerIndexTopicHandler(
+            \&indexTopicHandler );
+        Foswiki::Plugins::SolrPlugin::registerIndexAttachmentHandler(
+            \&indexAttachmentHandler );
+    }
 
     return 1;
 }
@@ -117,28 +121,29 @@ sub _initialize {
 # =========================
 # command line restHandler
 sub addTag {
-   my ( $session, $subject, $verb, $response ) = @_;
-   
-   #lets limit it to cmdline for now, I don't have the energy to work out what convoluted mech security is implemented through
-   return 'only for command line use' unless (defined(Foswiki::Func::getContext()->{command_line}));
-   
-   _initialize();
-   
-    my $query = $session->{request};
-    my $webtopic = $query->{param}->{webtopic}[0];
-    my $tag = $query->{param}->{tag}[0];   
-    my $text = '';
+    my ( $session, $subject, $verb, $response ) = @_;
 
-    ($web, $topic) = Foswiki::Func::normalizeWebTopicName('', $webtopic);
-    
+#lets limit it to cmdline for now, I don't have the energy to work out what convoluted mech security is implemented through
+    return 'only for command line use'
+      unless ( defined( Foswiki::Func::getContext()->{command_line} ) );
+
+    _initialize();
+
+    my $query    = $session->{request};
+    my $webtopic = $query->{param}->{webtopic}[0];
+    my $tag      = $query->{param}->{tag}[0];
+    my $text     = '';
+
+    ( $web, $topic ) = Foswiki::Func::normalizeWebTopicName( '', $webtopic );
+
     #TODO: should I test to make sure the topic exists?
-    
-    my $attr = {tag=>$tag, ignoreme=>1};
+
+    my $attr = { tag => $tag, ignoreme => 1 };
     $text .= _newTag( $attr, 'silent', 1 );
     $text .= _addTag($attr);
-   print STDERR "===========TagMe($web, $topic): $text\n";
+    print STDERR "===========TagMe($web, $topic): $text\n";
 
-   return "TagMePlugin/addTag\n\n".$text;
+    return "TagMePlugin/addTag\n\n" . $text;
 }
 
 # =========================
@@ -173,10 +178,10 @@ sub _addHeader {
 sub _TAGME {
     my ( $session, $attr, $topic, $web, $topicObject ) = @_;
     $action = $attr->{tpaction} || '';
-    $style  = $attr->{style} || '';
-    $label  = $attr->{label} || '';
-    $button = $attr->{button} || '';
-    $header = $attr->{header} || '';
+    $style  = $attr->{style}    || '';
+    $label  = $attr->{label}    || '';
+    $button = $attr->{button}   || '';
+    $header = $attr->{header}   || '';
     $header =~ s/\$n/\n/go;
     $footer = $attr->{footer} || '';
     $footer =~ s/\$n/\n/go;
@@ -417,8 +422,8 @@ sub _showStyleBlog {
           . "<br /><i>click to untag</i></p>";
         $text .= "<p class='tagmeBlog'><b>Tags on this topic by others: </b>"
           . join( ' ',
-            map    { $seen_others{$_} }
-              sort { lc $a cmp lc $b } keys(%seen_others) )
+            map  { $seen_others{$_} }
+            sort { lc $a cmp lc $b } keys(%seen_others) )
           . "<br /><i>click tag to also tag with, click delete icon to force untag by all</i></p>"
           if %seen_others;
     }
@@ -631,17 +636,17 @@ sub _showAllTags {
     my @allTags = _readAllTags();
     return '' if scalar @allTags == 0;
 
-    my $qWeb      = $attr->{web} || '';
-    my $qTopic    = $attr->{topic} || '';
-    my $exclude   = $attr->{exclude} || '';
-    my $by        = $attr->{by} || '';
-    my $format    = $attr->{format} || '';
-    my $header    = $attr->{header} || '';
+    my $qWeb      = $attr->{web}       || '';
+    my $qTopic    = $attr->{topic}     || '';
+    my $exclude   = $attr->{exclude}   || '';
+    my $by        = $attr->{by}        || '';
+    my $format    = $attr->{format}    || '';
+    my $header    = $attr->{header}    || '';
     my $separator = $attr->{separator} || '';
-    my $footer    = $attr->{footer} || '';
-    my $minSize   = $attr->{minsize} || '';
-    my $maxSize   = $attr->{maxsize} || '';
-    my $minCount  = $attr->{mincount} || '';
+    my $footer    = $attr->{footer}    || '';
+    my $minSize   = $attr->{minsize}   || '';
+    my $maxSize   = $attr->{maxsize}   || '';
+    my $minCount  = $attr->{mincount}  || '';
 
     $minCount = 1 if !defined($minCount) || $qWeb || $qTopic || $exclude || $by;
 
@@ -714,9 +719,10 @@ sub _showAllTags {
         }
 
         foreach $webTopic ( _getTagInfoList() ) {
+
             # SMELL: Dumb fix to dumb code, Item4627: Subwebs are assumed
             # to be separated with . instead of /
-            if ( $qWeb ) {
+            if ($qWeb) {
                 $qWeb =~ s!/!.!g;
             }
             next if ( $qWeb        && $webTopic !~ /^$qWeb\./ );
@@ -726,6 +732,7 @@ sub _showAllTags {
             my $num     = '';
             my $users   = '';
             foreach $line (@tagInfo) {
+
                 if ( $line =~ /$lineRegex/ ) {
                     $num   = $1;
                     $tag   = $2;
@@ -805,25 +812,25 @@ sub _showAllTags {
 sub _queryTag {
     my ($attr) = @_;
 
-    my $qWeb   = $attr->{web} || '';
+    my $qWeb   = $attr->{web}   || '';
     my $qTopic = $attr->{topic} || '';
-    my $qTag = _urlDecode( $attr->{tag} || '');
+    my $qTag = _urlDecode( $attr->{tag} || '' );
     my $refine =
          $attr->{refine}
       || Foswiki::Func::getPluginPreferencesFlag('ALWAYS_REFINE')
       || 1;
-    my $qBy       = $attr->{by} || '';
+    my $qBy       = $attr->{by}        || '';
     my $noRelated = $attr->{norelated} || '';
-    my $noTotal   = $attr->{nototal} || '';
+    my $noTotal   = $attr->{nototal}   || '';
     my $sort      = $attr->{sort}
       || 'tagcount';
     my $format = $attr->{format}
       || $tagQueryFormat;
     my $separator = $attr->{separator}
       || "\n";
-    my $minSize      = $attr->{minsize} || '';
-    my $maxSize      = $attr->{maxsize} || '';
-    my $resultLimit  = $attr->{limit} || '';
+    my $minSize     = $attr->{minsize} || '';
+    my $maxSize     = $attr->{maxsize} || '';
+    my $resultLimit = $attr->{limit}   || '';
     my $formatHeader = $attr->{header}
       || '---+++ $web';
     my $formatFooter = $attr->{footer}
@@ -864,9 +871,10 @@ sub _queryTag {
     my $webTopic = '';
 
     foreach $webTopic ( _getTagInfoList() ) {
+
         # SMELL: Dumb fix to dumb code, Item4627: Subwebs are assumed
         # to be separated with . instead of /
-        if ( $qWeb ) {
+        if ($qWeb) {
             $qWeb =~ s!/!.!g;
         }
         next if ( $qWeb        && $webTopic !~ /^$qWeb\./ );
@@ -1099,8 +1107,8 @@ sub _printTagLink {
 sub _newTag {
     my ($attr) = @_;
 
-    my $tag    = $attr->{tag} || '';
-    my $note   = $attr->{note} || '';
+    my $tag    = $attr->{tag}    || '';
+    my $note   = $attr->{note}   || '';
     my $silent = $attr->{silent} || '';
 
     return _wrapHtmlErrorFeedbackMessage( "<nop>$user cannot add new tags",
@@ -1159,7 +1167,7 @@ sub _makeSafeTag {
 sub _addTag {
     my ($attr) = @_;
 
-    my $addTag   = $attr->{tag} || '';
+    my $addTag   = $attr->{tag}      || '';
     my $noStatus = $attr->{nostatus} || '';
 
     my $webTopic = "$web.$topic";
@@ -1229,7 +1237,7 @@ sub _newTagsAndAdd {
     foreach my $tag ( split( ' ', $tags ) ) {
         $tag = _makeSafeTag($tag);
         if ($tag) {
-            $args = {tag => $tag};
+            $args = { tag => $tag };
             $text = _newTag($args);
             $text = _addTag($args) unless $text =~ /foswikiAlert/;
         }
@@ -1242,7 +1250,7 @@ sub _newTagsAndAdd {
 sub _removeTag {
     my ($attr) = @_;
 
-    my $removeTag = $attr->{tag} || '';
+    my $removeTag = $attr->{tag}      || '';
     my $noStatus  = $attr->{nostatus} || '';
 
     my $webTopic = "$web.$topic";
@@ -1302,7 +1310,7 @@ sub _removeTag {
 sub _removeAllTag {
     my ($attr) = @_;
 
-    my $removeTag = $attr->{tag} || '';
+    my $removeTag = $attr->{tag}      || '';
     my $noStatus  = $attr->{nostatus} || '';
 
     my $webTopic = "$web.$topic";
@@ -1554,7 +1562,7 @@ sub _renameTag {
 
     my $oldTag = $attr->{oldtag} || '';
     my $newTag = $attr->{newtag} || '';
-    my $note   = $attr->{note} || '';
+    my $note   = $attr->{note}   || '';
 
     my $query = Foswiki::Func::getCgiQuery();
     my $postChangeRequest = $query->param('postChangeRequest') || '';
@@ -1633,7 +1641,7 @@ sub _modifyTagInit {
 sub _deleteTag {
     my ($attr) = @_;
     my $deleteTag = $attr->{oldtag} || '';
-    my $note = $attr->{note} || '';
+    my $note      = $attr->{note}   || '';
 
     my $query = Foswiki::Func::getCgiQuery();
     my $postChangeRequest = $query->param('postChangeRequest') || '';
@@ -1654,8 +1662,8 @@ sub _deleteTag {
 # same as above but to be used inlinr on a topic, for some styles
 sub _deleteTheTag {
     my ($attr) = @_;
-    my $deleteTag = $attr->{tag} || '';
-    my $note = $attr->{note} || '';
+    my $deleteTag = $attr->{tag}  || '';
+    my $note      = $attr->{note} || '';
 
     return _htmlErrorFeedbackChangeMessage( 'delete', $note ) if !_canChange();
 
@@ -1769,40 +1777,41 @@ sub _writeDebug {
 # =========================
 sub _writeLog {
     if ($logAction) {
-        $Foswiki::Plugins::SESSION->logger->log(
-            'info', 'tagme', "$web.$topic", @_ );
+        $Foswiki::Plugins::SESSION->logger->log( 'info', 'tagme', "$web.$topic",
+            @_ );
     }
 }
-
 
 ###############################################################################
 #SolrPlugin specific indexers
 sub indexAttachmentHandler {
-  my ($indexer, $doc, $web, $topic, $attachment) = @_;
+    my ( $indexer, $doc, $web, $topic, $attachment ) = @_;
 
 }
 
 ###############################################################################
 sub indexTopicHandler {
-  my ($indexer, $doc, $web, $topic, $meta, $text) = @_;
+    my ( $indexer, $doc, $web, $topic, $meta, $text ) = @_;
 
     _initialize();
 
     my $webTopic = "$web.$topic";
-    my @tagInfo = _readTagInfo($webTopic);
+    my @tagInfo  = _readTagInfo($webTopic);
     my @tags;
     map {
-            if (/$lineRegex/) {
-                my $num   = $1;
-                my $tag   = $2;
-                my $users = $3;
-                #TODO: consider adding the tag once per user so it aligns with the counts TagMe
-                $doc->add_fields(tag=>$tag);
-                push(@tags, $tag);
-            }
-        } @tagInfo;
-    #print STDERR "TagMePlugin -> SolrPlugin: $web.topic: ".join(',', @tags)."\n";
-}
+        if (/$lineRegex/)
+        {
+            my $num   = $1;
+            my $tag   = $2;
+            my $users = $3;
 
+ #TODO: consider adding the tag once per user so it aligns with the counts TagMe
+            $doc->add_fields( tag => $tag );
+            push( @tags, $tag );
+        }
+    } @tagInfo;
+
+  #print STDERR "TagMePlugin -> SolrPlugin: $web.topic: ".join(',', @tags)."\n";
+}
 
 1;
