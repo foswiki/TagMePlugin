@@ -31,7 +31,7 @@ pub/System/TagMePlugin/topictags.gif 0644
 pub/System/TagMePlugin/topictags_styleblog.gif 0644
 pub/System/TagMePlugin/topictags_styleblog_open.gif 0644
 templates/view.tagme.tmpl 0644
-templates/view.tagme_styleblog.tmpl 0644
-templates/view.tagme_styleblogbutton.tmpl 0644
+templates/view.tagmestyleblog.tmpl 0644
+templates/view.tagmestyleblogbutton.tmpl 0644
 templates/view.tagmejquiajax.tmpl 0644 Deprecated template
 templates/view.tagmeajax.tmpl 0644
