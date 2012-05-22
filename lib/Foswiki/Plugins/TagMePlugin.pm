@@ -16,7 +16,7 @@ use vars qw(
 );
 
 our $VERSION           = '$Rev$';
-our $RELEASE           = '2.0.1';
+our $RELEASE           = '2.0.2';
 our $NO_PREFS_IN_TOPIC = 1;
 our $SHORTDESCRIPTION =
   'Tag wiki content collectively to find content by keywords';

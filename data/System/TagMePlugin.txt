@@ -174,7 +174,7 @@ The Plugin handles a =%<nop>TAGME{}%= variable that performs different actions. 
 	* =%<nop>TAGME{ tpaction="showalltags" ... }%= - view all tags or my tags as a tag cloud
 	  | *Parameter* | *Comment* | *Default* |
 	  | =by="me"= | My own tags only; can also be a USERNAME | all tags |
-	  | =web="%<nop>WEB%"= | Limit query to a web | current web |
+	  | =web="%<nop>WEB%"= | Limit query to a web | all webs |
 	  | =topic="*Plugin"= | Limit query to a topic, or a comma-space delimited list of topics with optional asterisk wildcards | all topics |
 	  | =exclude="fixme"= | Exclude tags; specify a tag, or a comma-space delimited list of tags with optional asterisk wildcards  | all tags |
 	  | =mincount="2"= | Exclude tags below the threshold of =mincount= votes | all tags | 
@@ -394,6 +394,7 @@ This can be done from the Extensions | !TagMePlugin tab - tick the ={Plugins}{Ta
       * Go to [[TagMeCreateNewTag]] and add a tag
 
 ---++ Plugin Info
+%TABLE{columnwidths="10%,90%"}%
 |  Plugin Author: | Arthur Clemens |
 |  Copyright: | &copy; 2006-2012, Foswiki Contributors, &copy; 2006-2007, Peter Thoeny |
 |  License: | GPL ([[http://www.gnu.org/copyleft/gpl.html][GNU General Public License]]) |
