@@ -400,6 +400,7 @@ This can be done from the Extensions | !TagMePlugin tab - tick the ={Plugins}{Ta
 |  Version: | %$VERSION% |
 |  Release: | %$RELEASE% |
 |  Change History: | <!-- versions below in reverse order -->&nbsp; |
+|  22 May 2012: | 2.0.2: Foswiki:Main.ArthurClemens: fixed format of log entries. |
 |  13 May 2012: | 2.0.1: Foswiki:Main.ArthurClemens: fixes to AJAX interface plus cosmetic update. |
 |  29 Jun 2011: | Foswiki:Main.SvenDowideit: add a command line resthandler to allow larger scale importing of tags |
 |  26 Jun 2011: | Foswiki:Main.SvenDowideit: add Foswiki:Main.SolrPlugin indexing and facet support to TagMePlugin (Foswiki:Tasks.Item10917), fix some bugs - Foswiki:Tasks.Item4628,  |

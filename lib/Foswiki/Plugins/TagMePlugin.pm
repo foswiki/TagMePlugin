@@ -1757,9 +1757,10 @@ sub _writeDebug {
 
 # =========================
 sub _writeLog {
+    my ($text) = @_;
+    
     if ($logAction) {
-        $Foswiki::Plugins::SESSION->logger->log( 'info', 'tagme', "$web.$topic",
-            @_ );
+        Foswiki::Func::writeEvent( 'tagme', $text );
     }
 }
 
