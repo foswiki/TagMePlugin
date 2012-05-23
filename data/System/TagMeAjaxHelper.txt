@@ -31,8 +31,13 @@ This topic contains =INCLUDE= sections. See TagMePlugin for instructions.
 <form id='tagmejqtaglistform' name='tagmeshow' method='post' action='%SCRIPTURLPATH{"viewauth"}%/%WEB%/%TOPIC%'>
 <span id='tagmejqtagbutton' class='foswikiEmulatedLink' title="%MAKETEXT{"View tag cloud"}%">%MAKETEXT{"Tags"}%</span>
 <span id='tagmejqtagstatus'></span>
-   <input type='text' name='add' class='foswikiInputField' placeholder='%MAKETEXT{"Add..."}%' id='tagmejqinputfield' title='%MAKETEXT{"Enter a tag name to apply to this topic"}%' size='6' value='%TAGME{ tpaction="showalltags" web="%BASEWEB%" topic="%BASETOPIC%"}%'/> 
+   <input type='%IF{
+	"'%BASETOPIC%' allows 'change'"
+	then="text"
+	else="hidden" 
+}%' name='add' class='foswikiInputField' placeholder='%MAKETEXT{"Add..."}%' id='tagmejqinputfield' title='%MAKETEXT{"Enter a tag name to apply to this topic"}%' size='6' value='%TAGME{ tpaction="showalltags" web="%BASEWEB%" topic="%BASETOPIC%"}%'/> 
 </form>
+TAGMEPLUGIN_JQUIREMOVEALL = %TAGMEPLUGIN_JQUIREMOVEALL%
 </noautolink></div>%ENDSECTION{"jqui"}%
 
 %STARTSECTION{"ajax"}%%TAGME{

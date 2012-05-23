@@ -4,7 +4,6 @@ Plugin to tag wiki content collectively in order to find content by tags and to 
 %TOC%
 
 ---++ Introduction
-
 The larger a wiki gets, the harder it is to find content. This wiki tagging plugin attempts to solve the issue based on these assumptions:
 
 	* Assertion 1: Intranet search does not work well due to inadequate ranking of search engines on intranets. This is because there are typically not many cross-links between pages.
@@ -31,10 +30,9 @@ The design goals of the <nop>%TOPIC% were as follows:
 	* Encourage users to create new tags, but try to avoid use of similar tags for the same subject
 	* Search for topic by tag, sorted by tag popularity
 
----++ User Interface
+---++ User interface
 
----+++ Tag List on Topic
-
+---+++ Tag list on topic
 Every topic has a list showing all tags associated with the topic. Additional tags can be added to the topic, and new tags can be created.
 
 ---++++ Default style
@@ -103,19 +101,19 @@ Dependencies:
 
 ---+++ Create, Rename, Delete tags
 
----++++ Create New Tags
+---++++ Create new tags
 Go to [[TagMeCreateNewTag]] to create new tags. %BR%
-Anyone is allowed to create new tags.
+Anyone is allowed to create new tags - but only users with change permission can add tags to topics.
 
 <blockquote>
 For developers: %BR%
 Use the url parameter =createtag=my+tag+name= to pass a new tag name to the form.
 </blockquote>
 
----++++ Add Tag to Topic
-Once a new tag is created, it can be added in the tag list of the topic.
+---++++ Add tag to topic
+Once a new tag is created, it can be added in the tag list of the topic. Only users with change permission can add tags to topics.
 
----++++ Rename Tags
+---++++ Rename tags
 Go to [[TagMeRenameTag]] to rename existing tags. %BR%
 Rename permissions are controlled with =ALLOW_TAG_CHANGE= (see [[#PluginSettings][Plugin Settings]] below).
 
@@ -124,7 +122,7 @@ For developers: %BR%
 Use the url parameters =renametagfrom=my+old+tag+name= and =renametagto=my+new+tag+name= to pass the old and new tag names to the form.
 </blockquote>
 
----++++ Delete Tags
+---++++ Delete tags
 Go to [[TagMeDeleteTag]] to delete existing tags. %BR%
 Delete permissions are controlled with =ALLOW_TAG_CHANGE= (see [[#PluginSettings][Plugin Settings]] below).
 
@@ -134,8 +132,7 @@ Use the url parameter =deletetag=my+tag+name= to pass the to-be-deleted tag name
 </blockquote>
 
 
----+++ List All Tags
-
+---+++ List all tags
 %SYSTEMWEB%.TagMeViewAllTags shows all tags used in the system. The font size indicates the overall tag count of a tag.
 
 Screenshot of tag cloud in the list all tags view:
@@ -151,16 +148,13 @@ __%T% Tip:__ In a <nop>%HOMETOPIC% of a web you can show a tag cloud of all tagg
 </verbatim>
 
 
----+++ List My Tags
-
+---+++ List my tags
 %SYSTEMWEB%.TagMeViewMyTags shows all tags used by logged-in user. The font size indicates the overall tag count of a tag.
 
----+++ Tag Search
-
+---+++ Tag search
 %SYSTEMWEB%.TagMeSearch shows a list of topics that are tagged with all of the selected tags, sorted by relevance. Topics with a high tag count are shown first.
 
----+++ Plugin Variable
-
+---+++ Plugin variable
 The Plugin handles a =%<nop>TAGME{}%= variable that performs different actions. The =tpaction=""= is a required parameter.
 
 	* =%<nop>TAGME{ tpaction="show" ...}%= - shows the tag list on topic
@@ -225,7 +219,6 @@ The Plugin handles a =%<nop>TAGME{}%= variable that performs different actions. 
 
 #TagsOnPage
 ---++ How to put tags on every page
-
 To show the tag interface at the top of the page directly below the breadcrumb (like on foswiki.org), use the default template =view.tagme.tmpl= in the templates directory.
 
 This template is in fact a 'skin' template. To enable it, write in [[%USERSWEB%.SitePreferences]]:
@@ -278,7 +271,7 @@ Tags: %TAGME{ tpaction="showalltags" web="%WEB%" topic="%TOPIC%" format="<a href
 </verbatim>
 
 ---++ Tag styles
----+++ CSS Styles
+---+++ CSS styles
 !TagMePlugin writes the following CSS styles:
 
 | *Class*             | *Used where* |
@@ -359,7 +352,7 @@ grep '\-\-\-+' ../data/System/*.txt | grep -s Admin | sed 's/..\/data\/System\//
 </verbatim>
 
 #PluginSettings
----++ Plugin Settings
+---++ Plugin settings
 
 Plugin settings are stored as preferences. To reference a plugin setting write ==%<nop>&lt;plugin&gt;_&lt;setting&gt;%==, e.g., ==%<nop>TAGMEPLUGIN_SHORTDESCRIPTION%==
 
@@ -382,7 +375,7 @@ To index !TagMePlugin tags for use in !SolrPlugins's faceted search, your Foswik
 
 This can be done from the Extensions | !TagMePlugin tab - tick the ={Plugins}{TagMePlugin}{SolrPluginIndex}= option and save.
 		
----++ Plugin Installation Instructions
+---++ Plugin Installation instructions
 %$INSTALL_INSTRUCTIONS%
 
    * Change the Plugin settings as needed:
@@ -393,16 +386,18 @@ This can be done from the Extensions | !TagMePlugin tab - tick the ={Plugins}{Ta
    * Test if the installation was successful:
       * Go to [[TagMeCreateNewTag]] and add a tag
 
----++ Plugin Info
+---++ Plugin info
 %TABLE{columnwidths="10%,90%"}%
-|  Plugin Author: | Arthur Clemens |
+|  Plugin Author: | Foswiki:Main.ArthurClemens |
 |  Copyright: | &copy; 2006-2012, Foswiki Contributors, &copy; 2006-2007, Peter Thoeny |
 |  License: | GPL ([[http://www.gnu.org/copyleft/gpl.html][GNU General Public License]]) |
 |  Version: | %$VERSION% |
 |  Release: | %$RELEASE% |
 |  Change History: | <!-- versions below in reverse order -->&nbsp; |
-|  22 May 2012: | 2.0.2: Foswiki:Main.ArthurClemens: fixed format of log entries. Foswiki:Tasks.Item11887: remove underscores from template names: =tagme_styleblog= is now named =tagmestyleblog=; =tagme_styleblogbutton= is now named =tagmestyleblogbutton=. |
-|  13 May 2012: | 2.0.1: Foswiki:Main.ArthurClemens: fixes to AJAX interface plus cosmetic update. |
+|  23 May 2012: | 2.1.0: Arthur Clemens: allow adding of tags only if user has change permission. Only show close buttons if user is allowed to remove tags (AJAX interface). |
+|  22 May 2012: | 2.0.2: Arthur Clemens: fixed format of log entries. %BR% \
+Foswiki:Tasks.Item11887: remove underscores from template names: =tagme_styleblog= is now named =tagmestyleblog=; =tagme_styleblogbutton= is now named =tagmestyleblogbutton=. |
+|  13 May 2012: | 2.0.1: Arthur Clemens: fixes to AJAX interface plus cosmetic update. |
 |  29 Jun 2011: | Foswiki:Main.SvenDowideit: add a command line resthandler to allow larger scale importing of tags |
 |  26 Jun 2011: | Foswiki:Main.SvenDowideit: add Foswiki:Main.SolrPlugin indexing and facet support to TagMePlugin (Foswiki:Tasks.Item10917), fix some bugs - Foswiki:Tasks.Item4628,  |
 |  08 Jun 2011: | Foswiki:Main.PaulHarvey: Minimal fix to experimental jqui to work with jQuery > 1.3 |
@@ -412,20 +407,20 @@ This can be done from the Extensions | !TagMePlugin tab - tick the ={Plugins}{Ta
 |  30 Aug 2008: | Foswiki:Main.ColasNahaboo: enhancements to the "blog" style: Bundles, count of known tags, option to delete tags |
 |  28 Aug 2008: | Foswiki:Main.ColasNahaboo: prefix & suffix options renamed as header & footer. New parameter style to TAGME to be able to define different UI style for the default "show" action of TAGME. Implemented a first one, "blog" for the simpler case of authors managing the same tags |
 |  26 Aug 2008: | Foswiki:Main.ColasNahaboo: prefix & suffix options to TAGME |
-|  16 Oct 2007: | Foswiki:Main.ArthurClemens: added backward compatible example template. |
+|  16 Oct 2007: | Arthur Clemens: added backward compatible example template. |
 |  26 Sep 2007: | Foswiki:Main.CrawfordCurrie Item4728 fixed incorrect cloud font sizes to reflect relative importance of tags actually being displayed |
-|  11 Sep 2007: | Foswiki:Main.ArthurClemens: updated example template to TWiki template convention. |
-|  11 Jun 2007: | Foswiki:Main.ArthurClemens: fixed sizing of tags with the same tag count; fixed CSS class for select box; updated documentation with "How to put tags on every page". |
-|  07 Jun 2007: | Foswiki:Main.ArthurClemens: removed dependency on (unreleased) TWiki 4.2. |
+|  11 Sep 2007: | Arthur Clemens: updated example template to TWiki template convention. |
+|  11 Jun 2007: | Arthur Clemens: fixed sizing of tags with the same tag count; fixed CSS class for select box; updated documentation with "How to put tags on every page". |
+|  07 Jun 2007: | Arthur Clemens: removed dependency on (unreleased) TWiki 4.2. |
 |  21 May 2007: | Foswiki:Main.WillNorris: added =view.tagme.tmpl= and updated installation instructions. |
-|  30 Apr 2007: | Foswiki:Main.ArthurClemens: fixed calculation of sizes in tag cloud; if =mincount= is passed only the shown tags are calculated. |
-|  18 Apr 2007: | Foswiki:Main.ArthurClemens: added permissions for rename and delete; added TagMeChangeRequests. |
+|  30 Apr 2007: | Arthur Clemens: fixed calculation of sizes in tag cloud; if =mincount= is passed only the shown tags are calculated. |
+|  18 Apr 2007: | Arthur Clemens: added permissions for rename and delete; added TagMeChangeRequests. |
 |  17 Apr 2007: | Foswiki:Main.CrawfordCurrie for [[http://www.escapestudios.co.uk/][Escape Studios]]: contributed support for incremental refinement of tag searches. |
 |  12 Apr 2007: | Foswiki:Main.CrawfordCurrie contributed ability to search for multiple tags. TWiki:Main.SvenDowideit for [[http://www.escapestudios.co.uk/][Escape Studios]]: added parameters needed for custom search result display. |
-|  05 Apr 2007: | Foswiki:Main.ArthurClemens: The "topic tags" select box is now created with Javascript to prevent the tag options getting indexed by search engines. The former select box is used for noscript fallback. |
-|  02 Apr 2007: | Foswiki:Main.ArthurClemens: Added "Delete Tag" interface. Added tabbed interface for Create, Rename, Delete tags. |
-|  30 Mar 2007: | Foswiki:Main.ArthurClemens: Added "Rename Tag" interface. |
-|  22 Mar 2007: | Foswiki:Main.ArthurClemens: Added option =NORMALIZE_TAG_INPUT= (to be set to 0) to allow any word as tag name (including upper case, punctuation characters and spaces). Moved "Create New Tag" to dedicated page. Created CSS styles in =tagme.css=. Added =mincount= parameter to =TAGME{tpaction="showalltags"}=. |
+|  05 Apr 2007: | Arthur Clemens: The "topic tags" select box is now created with Javascript to prevent the tag options getting indexed by search engines. The former select box is used for noscript fallback. |
+|  02 Apr 2007: | Arthur Clemens: Added "Delete Tag" interface. Added tabbed interface for Create, Rename, Delete tags. |
+|  30 Mar 2007: | Arthur Clemens: Added "Rename Tag" interface. |
+|  22 Mar 2007: | Arthur Clemens: Added option =NORMALIZE_TAG_INPUT= (to be set to 0) to allow any word as tag name (including upper case, punctuation characters and spaces). Moved "Create New Tag" to dedicated page. Created CSS styles in =tagme.css=. Added =mincount= parameter to =TAGME{tpaction="showalltags"}=. |
 |  14 Nov 2006: | Fix IE browser crash issue on print (forms can't be named "tags"; debug by TWiki:Main.KevinKalmbach) |
 |  14 Oct 2006: | Fix show default problem introduced by version 07 Oct 2006 (contributed by TWiki:Main.ChristianSuenkel) |
 |  07 Oct 2006: | nostatus="on" parameter for add/remove tag (contributed by TWiki:Main.FredMorris) |

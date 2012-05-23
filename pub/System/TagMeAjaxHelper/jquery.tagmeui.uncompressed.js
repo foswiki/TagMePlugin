@@ -226,6 +226,8 @@ jQuery(document).ready(function () {
             var that = this;
             
             $(this.settings.taglistInputField).textboxlist({
+            	/* only show close buttons if user is allowed to remove tags */
+            	enableClose: $('meta[name="foswiki.TagMePlugin.remove"]').attr('content') != '',
                 onSelect: function (input) {
                     /* The logic here is a bit odd, started out anticipating a batch rather than
                     ** one-by-one POST to updated a modified selection of tags... */

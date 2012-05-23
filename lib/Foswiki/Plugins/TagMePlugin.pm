@@ -6,6 +6,7 @@
 package Foswiki::Plugins::TagMePlugin;
 
 use strict;
+use warnings;
 
 # =========================
 use vars qw(
@@ -16,11 +17,11 @@ use vars qw(
 );
 
 our $VERSION           = '$Rev$';
-our $RELEASE           = '2.0.2';
+our $RELEASE           = '2.1.0';
 our $NO_PREFS_IN_TOPIC = 1;
 our $SHORTDESCRIPTION =
   'Tag wiki content collectively to find content by keywords';
-our $pluginName = 'TagMePlugin';    # Name of this Plugin
+our $pluginName = 'TagMePlugin';
 
 our $initialized = 0;
 our $lineRegex   = "^0*([0-9]+), ([^,]+), (.*)";
@@ -286,14 +287,20 @@ sub _showDefault {
     foreach (@allTags) {
         push( @notSeen, $_ ) unless ( $seen{$_} );
     }
-    if ( scalar @notSeen ) {
-        if ( $tagMode eq 'nojavascript' ) {
-            $text .= _createNoJavascriptSelectBox(@notSeen);
-        }
-        else {
-            $text .= _createJavascriptSelectBox(@notSeen);
-        }
-    }
+    
+    my $topicObject =
+      Foswiki::Meta->new( $Foswiki::Plugins::SESSION, $web, $topic );
+
+    if ( $topicObject->haveAccess('CHANGE') ) {
+		if ( scalar @notSeen ) {
+			if ( $tagMode eq 'nojavascript' ) {
+				$text .= _createNoJavascriptSelectBox(@notSeen);
+			}
+			else {
+				$text .= _createJavascriptSelectBox(@notSeen);
+			}
+		}
+	}
     $text .= ' '
       . _wrapHtmlTagControl(
             "<a href=\"%SCRIPTURL{viewauth}%/$installWeb/TagMeCreateNewTag"
@@ -1092,9 +1099,13 @@ sub _newTag {
     my $note   = $attr->{note}   || '';
     my $silent = $attr->{silent} || '';
 
-    return _wrapHtmlErrorFeedbackMessage( "<nop>$user cannot add new tags",
-        $note )
-      if ( $user =~ /^(WikiGuest|guest)$/ );
+    my $topicObject =
+      Foswiki::Meta->new( $Foswiki::Plugins::SESSION, $web, $topic );
+
+    if ( !$topicObject->haveAccess('CHANGE') ) {
+        return _wrapHtmlErrorFeedbackMessage( "<nop>$user cannot add new tags",
+            $note );
+    }
 
     $tag = _makeSafeTag($tag);
 
@@ -1758,7 +1769,7 @@ sub _writeDebug {
 # =========================
 sub _writeLog {
     my ($text) = @_;
-    
+
     if ($logAction) {
         Foswiki::Func::writeEvent( 'tagme', $text );
     }
