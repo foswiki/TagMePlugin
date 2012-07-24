@@ -1529,8 +1529,9 @@ sub _modifyTag {
 sub _canChange {
 
     my $allowModifyPrefNames =
-      Foswiki::Func::getPluginPreferencesValue('ALLOW_TAG_CHANGE')
-      || 'AdminGroup';
+      Foswiki::Func::getPluginPreferencesValue('ALLOW_TAG_CHANGE');
+    $allowModifyPrefNames = 'AdminGroup'
+        unless defined $allowModifyPrefNames;   # default to AdminGroup
 
     return 1 if !$allowModifyPrefNames;    # anyone is allowed to change
 
