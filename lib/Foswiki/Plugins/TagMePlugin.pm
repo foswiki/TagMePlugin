@@ -1099,13 +1099,9 @@ sub _newTag {
     my $note   = $attr->{note}   || '';
     my $silent = $attr->{silent} || '';
 
-    my $topicObject =
-      Foswiki::Meta->new( $Foswiki::Plugins::SESSION, $web, $topic );
-
-    if ( !$topicObject->haveAccess('CHANGE') ) {
-        return _wrapHtmlErrorFeedbackMessage( "<nop>$user cannot add new tags",
-            $note );
-    }
+    return _wrapHtmlErrorFeedbackMessage( "<nop>$user cannot add new tags",
+        $note )
+      if ( $user =~ /^(WikiGuest|guest)$/ );
 
     $tag = _makeSafeTag($tag);
 
@@ -1169,7 +1165,22 @@ sub _addTag {
     my $num      = '';
     my $users    = '';
     my @result   = ();
-    if ( Foswiki::Func::topicExists( $web, $topic ) ) {
+
+    # check if topic exists, and if the user has CHANGE permission
+    if ( !Foswiki::Func::topicExists( $web, $topic ) ) {
+        $text .=
+          _wrapHtmlFeedbackErrorInline("tag not added, topic does not exist");
+    }
+    else {
+        my $topicObject =
+          Foswiki::Meta->new( $Foswiki::Plugins::SESSION, $web, $topic );
+        $text .= _wrapHtmlFeedbackErrorInline("<nop>$user cannot add new tags")
+          if ( !$topicObject->haveAccess('CHANGE') );
+    }
+
+    unless ($text) {
+
+        # checks completed ok
         foreach my $line (@tagInfo) {
             if ( $line =~ /$lineRegex/ ) {
                 $num   = $1;
@@ -1206,10 +1217,6 @@ sub _addTag {
         }
         @tagInfo = reverse sort(@result);
         _writeTagInfo( $webTopic, @tagInfo );
-    }
-    else {
-        $text .=
-          _wrapHtmlFeedbackErrorInline("tag not added, topic does not exist");
     }
 
     # Suppress status? FWM, 03-Oct-2006
