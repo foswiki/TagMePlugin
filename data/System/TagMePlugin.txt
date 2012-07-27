@@ -103,7 +103,7 @@ Dependencies:
 
 ---++++ Create new tags
 Go to [[TagMeCreateNewTag]] to create new tags. %BR%
-Anyone is allowed to create new tags - but only users with change permission can add tags to topics.
+Any logged-in user is allowed to create new tags - but only users with change permission can add tags to topics.
 
 <blockquote>
 For developers: %BR%
@@ -394,6 +394,8 @@ This can be done from the Extensions | !TagMePlugin tab - tick the ={Plugins}{Ta
 |  Version: | %$VERSION% |
 |  Release: | %$RELEASE% |
 |  Change History: | <!-- versions below in reverse order -->&nbsp; |
+|  27 Jul 2012: | 2.1.1: FlorianSchlichting: Foswiki:Tasks.Item8344: allow everyone to change tags by setting TAGMEPLUGIN_ALLOW_TAG_CHANGE to an empty value (bugfix).%BR%\
+Foswiki:Tasks.Item12009: allow any logged-in user to create new tags (bugfix). |
 |  23 May 2012: | 2.1.0: Arthur Clemens: allow adding of tags only if user has change permission. Only show close buttons if user is allowed to remove tags (AJAX interface). |
 |  22 May 2012: | 2.0.2: Arthur Clemens: fixed format of log entries. %BR% \
 Foswiki:Tasks.Item11887: remove underscores from template names: =tagme_styleblog= is now named =tagmestyleblog=; =tagme_styleblogbutton= is now named =tagmestyleblogbutton=. |
