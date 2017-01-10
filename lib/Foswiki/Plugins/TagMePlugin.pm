@@ -16,8 +16,8 @@ use vars qw(
   $topicsRegex $action $style $label $header $footer $button
 );
 
-our $VERSION           = '$Rev$';
-our $RELEASE           = '2.1.1';
+our $VERSION           = '2.2';
+our $RELEASE           = '10 Jan 2017';
 our $NO_PREFS_IN_TOPIC = 1;
 our $SHORTDESCRIPTION =
   'Tag wiki content collectively to find content by keywords';
@@ -287,7 +287,7 @@ sub _showDefault {
     foreach (@allTags) {
         push( @notSeen, $_ ) unless ( $seen{$_} );
     }
-    
+
     my $topicObject =
       Foswiki::Meta->new( $Foswiki::Plugins::SESSION, $web, $topic );
 
@@ -367,7 +367,7 @@ sub _showStyleBlog {
             $seen{$tag} = lc $1;
             if ( $users =~ /\b$user\b/ ) {    # we tagged this topic
                 $line =
-                    "<a class='tagmeTag' href='" 
+                    "<a class='tagmeTag' href='"
                   . $topic
                   . "?tpaction=remove;tag="
                   . &_urlEncode($tag) . "'>"
@@ -376,7 +376,7 @@ sub _showStyleBlog {
             }
             else {                            # others tagged it
                 $line =
-                    "<a class='tagmeTag' href='" 
+                    "<a class='tagmeTag' href='"
                   . $topic
                   . "?tpaction=add;tag="
                   . &_urlEncode($tag) . "'>"
@@ -447,7 +447,7 @@ sub _showStyleBlog {
         $text .= "<p class='tagmeBlog'><b>Related tags:</b> ";
         foreach my $tag ( keys %related ) {
             $text .=
-                "<a class='tagmeTag' href='" 
+                "<a class='tagmeTag' href='"
               . $topic
               . "?tpaction=add;tag="
               . &_urlEncode($tag) . "'>"
@@ -473,7 +473,7 @@ sub _showStyleBlog {
                 }
                 else {
                     $text .=
-                        "<a class='tagmeTag' href='" 
+                        "<a class='tagmeTag' href='"
                       . $topic
                       . "?tpaction=autonewadd;tag="
                       . &_urlEncode($tag) . "'>"
@@ -495,7 +495,7 @@ sub _showStyleBlog {
         $text .= "<p class='tagmeBlog'><b>Available known tags:</b> ";
         foreach my $tag (@notSeen) {
             $text .=
-                "<a class='tagmeTag' href='" 
+                "<a class='tagmeTag' href='"
               . $topic
               . "?tpaction=add;tag="
               . &_urlEncode($tag) . "'>"
@@ -525,7 +525,7 @@ sub _showStyleBlog {
         <br /><i>You can enter multiple tags separated by spaces</i></p>";
 
     # more
-    $text .= "<p class='tagmeBlog'><b>Tags management:</b> 
+    $text .= "<p class='tagmeBlog'><b>Tags management:</b>
         [[%SYSTEMWEB%.TagMeCreateNewTag][create tags]] -
         [[%SYSTEMWEB%.TagMeRenameTag][rename tags]] -
 	[[%SYSTEMWEB%.TagMeDeleteTag][delete tags]] -
@@ -605,7 +605,7 @@ sub _addNewButton {
 
     my $input = '<input type="hidden" name="tpaction" value="add" />';
     $input .=
-        '<input type="image"' 
+        '<input type="image"'
       . ' src="'
       . $attachUrl
       . '/tag_addnew.gif"'
@@ -1402,7 +1402,7 @@ sub _readTagInfo {
     my ($webTopic) = @_;
 
     $webTopic =~ s/[\/\\]/\./g;
-    my $text = Foswiki::Func::readFile("$workAreaDir/_tags_$webTopic.txt");
+    my $text = Foswiki::Func::readFile("$workAreaDir/_tags_$webTopic.txt", 1);
     my @info = grep { /^[0-9]/ } split( /\n/, $text );
     return @info;
 }
@@ -1415,7 +1415,7 @@ sub _writeTagInfo {
     if ( scalar @info ) {
         my $text = "# This file is generated, do not edit\n"
           . join( "\n", reverse sort @info ) . "\n";
-        Foswiki::Func::saveFile( $file, $text );
+        Foswiki::Func::saveFile( $file, $text, 1 );
     }
     elsif ( -e $file ) {
         unlink($file);
@@ -1431,15 +1431,15 @@ sub renameTagInfo {
     my $oldFile = "$workAreaDir/_tags_$oldWebTopic.txt";
     my $newFile = "$workAreaDir/_tags_$newWebTopic.txt";
     if ( -e $oldFile ) {
-        my $text = Foswiki::Func::readFile($oldFile);
-        Foswiki::Func::saveFile( $newFile, $text );
+        my $text = Foswiki::Func::readFile($oldFile, 1);
+        Foswiki::Func::saveFile( $newFile, $text, 1 );
         unlink($oldFile);
     }
 }
 
 # =========================
 sub _readAllTags {
-    my $text = Foswiki::Func::readFile("$workAreaDir/_tags_all.txt");
+    my $text = Foswiki::Func::readFile("$workAreaDir/_tags_all.txt", 1);
 
     #my @tags = grep{ /^[${alphaNum}_]/ } split( /\n/, $text );
     # we assume that this file has been written by TagMe, so tags should be
@@ -1455,7 +1455,7 @@ sub writeAllTags {
     my (@tags) = @_;
     my $text = "# This file is generated, do not edit\n"
       . join( "\n", sort { lc $a cmp lc $b } @tags ) . "\n";
-    Foswiki::Func::saveFile( "$workAreaDir/_tags_all.txt", $text );
+    Foswiki::Func::saveFile( "$workAreaDir/_tags_all.txt", $text, 1 );
 }
 
 # =========================
@@ -1744,6 +1744,8 @@ sub _htmlPostChangeRequestFormField {
 
 # =========================
 sub _urlEncode {
+    return Foswiki::urlEncode( $_[0] ) if $Foswiki::UNICODE;
+
     my $text = shift;
     $text =~ s/([^0-9a-zA-Z-_.:~!*'()\/%])/'%'.sprintf('%02x',ord($1))/ge;
     return $text;
@@ -1751,6 +1753,8 @@ sub _urlEncode {
 
 # =========================
 sub _urlDecode {
+    return $_[0] if $Foswiki::UNICODE;
+
     my $text = shift;
     $text =~ s/%([\da-f]{2})/chr(hex($1))/gei;
     return $text;
@@ -1765,7 +1769,7 @@ sub _handleMakeText {
 
     # very crude hack to remove MAKETEXT{"...."}
     # Note: parameters are _not_ supported!
-    $_[0] =~ s/[%]MAKETEXT{ *\"(.*?)." *}%/$1/go;
+    $_[0] =~ s/[%]MAKETEXT\{ *\"(.*?)." *\}%/$1/go;
 }
 
 # =========================
@@ -1821,7 +1825,7 @@ __DATA__
 
 # Plugin for Foswiki - The Free and Open Source Wiki, http://foswiki.org/
 #
-# Copyright (C) 2011-2012 Foswiki Contributors
+# Copyright (C) 2011-2017 Foswiki Contributors
 # Copyright (c) 2007-2011 Sven Dowideit, SvenDowideit@fosiki.com
 # Copyright (c) 2007 Arthur Clemens, arthur@visiblearea.com
 # Copyright (c) 2007-2009 Crawford Currie, http://c-dot.co.uk
