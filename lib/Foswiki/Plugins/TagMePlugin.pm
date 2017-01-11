@@ -1390,11 +1390,16 @@ sub _getTagInfoList {
     my @list = ();
     if ( opendir( DIR, "$workAreaDir" ) ) {
         my @files =
-          grep { !/^_tags_all\.txt$/ } grep { /^_tags_.*\.txt$/ } readdir(DIR);
+          grep { !/^_tags_all\.txt$/ } grep { /^_tags_.*\.txt$/ } map { _decode_utf8($_) } readdir(DIR);
         closedir DIR;
         @list = map { s/^_tags_(.*)\.txt$/$1/; $_ } @files;
     }
     return sort @list;
+}
+
+sub _decode_utf8 {
+    return Foswiki::decode_utf8( $_[0] ) if $Foswiki::UNICODE;
+    return $_[0];
 }
 
 # =========================
